@@ -3,10 +3,16 @@ import { z } from 'zod';
 const schema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  SUPABASE_ANON_KEY: z.string().min(1).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   ACCEPTANCE_ENCRYPTION_KEY: z.string().regex(/^[a-fA-F0-9]{64}$/),
   CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
   MERCADO_PAGO_ACCESS_TOKEN: z.string().min(1).optional(),
+  NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY: z.string().min(1).optional(),
+  MERCADO_PAGO_USER_ID: z.string().min(1).optional(),
+  MERCADO_PAGO_APP_ID: z.string().min(1).optional(),
+  MERCADO_PAGO_CLIENT_ID: z.string().min(1).optional(),
+  MERCADO_PAGO_CLIENT_SECRET: z.string().min(1).optional(),
   MERCADO_PAGO_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
