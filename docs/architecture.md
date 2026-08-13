@@ -2,10 +2,19 @@
 
 ## Responsabilidades
 
-- **Vercel:** Next.js App Router com Route Handlers stateless, validação, autenticação de bearer token e criptografia do CPF.
+- **Vercel:** ambiente de produção de todo o produto: Next.js App Router, frontend futuro, Route Handlers/backend, validação, autenticação e criptografia do CPF.
 - **Supabase:** Auth, Postgres, RLS, transações RPC e trilha imutável de eventos.
-- **Cloudflare:** DNS, TLS, WAF, rate limiting e Turnstile. R2 só entra se contratos/PDFs exigirem armazenamento; no início, Supabase Storage reduz operação.
+- **Cloudflare:** exclusivamente Workers e R2. O bucket `fechazap-files` deve permanecer privado; acesso externo será por URL assinada ou pelo Worker de arquivos. Não usar Pages, D1 ou KV neste projeto.
 - **Mercado Pago:** adaptador futuro em `payments.provider = mercado_pago`; V1 usa `manual_pix`, conforme o plano.
+
+## Arquivos e Workers
+
+- R2 guarda logos, anexos, contratos e PDFs usando prefixos por prestador (`providers/<user-id>/...`).
+- Metadados e autorização continuam no Postgres; R2 não é fonte de verdade do negócio.
+- O backend na Vercel emite autorização curta para upload/download. Nenhuma credencial S3 chega ao navegador.
+- Um Worker será criado somente junto do primeiro fluxo real de arquivo para validar assinatura, tamanho, MIME e chave/prefixo.
+- URLs públicas permanentes e `r2.dev` ficam desabilitados; documentos pessoais são sempre privados.
+- Workers não processam pagamentos nem substituem os Route Handlers da Vercel.
 
 ## Limites de segurança
 

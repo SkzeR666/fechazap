@@ -12,7 +12,7 @@ Backend-first do FechaZap em Next.js App Router: página pública de serviços e
 - PIX manual; Mercado Pago fica apenas previsto no modelo de pagamentos
 - Route Handlers do Next.js prontos para Vercel
 - helpers Supabase SSR para browser, servidor e renovação de sessão via `proxy.ts`
-- Cloudflare recomendado para DNS, wildcard e Turnstile na borda
+- Cloudflare restrito a Workers e arquivos privados no R2
 
 ## Desenvolvimento
 
@@ -48,8 +48,8 @@ O header das rotas do prestador é `Authorization: Bearer <access_token>`.
 
 1. Crie o projeto no Supabase e rode `npx supabase link` e `npm run db:push`.
 2. Importe o repositório na Vercel como **Next.js / App Router** e configure as variáveis de `.env.example`.
-3. Configure `api.fechazap.com` na Vercel. Deixe `*.fechazap.com` para a futura aplicação pública; a API recebe o slug explicitamente.
-4. No Cloudflare, habilite proxy, SSL Full (strict), WAF/rate limit e Turnstile no formulário público antes do tráfego real.
+3. Hospede frontend e backend na Vercel; a API recebe o slug explicitamente.
+4. No Cloudflare, use apenas Worker de arquivos + bucket R2 privado. Não use Pages, D1 ou KV para o FechaZap.
 5. Só depois rode o servidor ou publique. Nunca use a service role no navegador.
 
 Consulte [docs/architecture.md](docs/architecture.md) para decisões e próximos módulos.
