@@ -1,0 +1,1 @@
+-- Intentionally empty: local users should be created through Supabase Auth.
