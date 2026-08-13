@@ -11,16 +11,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js}\" \"tests/**/*.{ts,js}\" \"cloudflare/**/*.js\" \"*.{json,ts,md}\" \"docs/**/*.md\" .env.example",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js}\" \"tests/**/*.{ts,js}\" \"cloudflare/**/*.js\" \"*.{json,ts,md}\" \"docs/**/*.md\" .env.example",
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
     "cf:deploy:files": "wrangler deploy --config cloudflare/files-worker/wrangler.toml"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.864.0",
-    "@aws-sdk/s3-request-presigner": "^3.864.0",
-    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.49.8",
     "next": "^16.0.0",
     "pdf-lib": "^1.17.1",
@@ -36,6 +37,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/ws": "^8.18.1",
     "eslint": "^9.27.0",
+    "prettier": "^3.9.6",
     "supabase": "^2.23.4",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.0",

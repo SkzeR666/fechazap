@@ -1,4 +1,57 @@
-import { z } from 'zod';import { apiError,authenticatedDb } from '@/src/server/http';
-const schema=z.object({name:z.string().trim().min(2).max(120).optional(),description:z.string().trim().max(1000).nullable().optional(),priceCents:z.number().int().nonnegative().nullable().optional(),active:z.boolean().optional(),sortOrder:z.number().int().optional()});
-export async function PATCH(request:Request,{params}:{params:Promise<{id:string}>}){try{const auth=await authenticatedDb(request);if(!auth)return Response.json({error:'unauthorized'},{status:401});const[{id},body]=await Promise.all([params,request.json().then(v=>schema.parse(v))]);const row={name:body.name,description:body.description,price_cents:body.priceCents,active:body.active,sort_order:body.sortOrder};const clean=Object.fromEntries(Object.entries(row).filter(([,v])=>v!==undefined));const{data,error}=await auth.db.from('services').update(clean).eq('id',id).select().single();if(error)throw error;return Response.json(data)}catch(e){return apiError(e)}}
-export async function DELETE(request:Request,{params}:{params:Promise<{id:string}>}){try{const auth=await authenticatedDb(request);if(!auth)return Response.json({error:'unauthorized'},{status:401});const{id}=await params;const{error}=await auth.db.from('services').delete().eq('id',id);if(error)throw error;return new Response(null,{status:204})}catch(e){return apiError(e)}}
+import { z } from "zod";
+import { apiError, authenticatedDb } from "@/src/server/http";
+const schema = z.object({
+  name: z.string().trim().min(2).max(120).optional(),
+  description: z.string().trim().max(1000).nullable().optional(),
+  priceCents: z.number().int().nonnegative().nullable().optional(),
+  active: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+});
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const auth = await authenticatedDb(request);
+    if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    const [{ id }, body] = await Promise.all([
+      params,
+      request.json().then((v) => schema.parse(v)),
+    ]);
+    const row = {
+      name: body.name,
+      description: body.description,
+      price_cents: body.priceCents,
+      active: body.active,
+      sort_order: body.sortOrder,
+    };
+    const clean = Object.fromEntries(
+      Object.entries(row).filter(([, v]) => v !== undefined),
+    );
+    const { data, error } = await auth.db
+      .from("services")
+      .update(clean)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return Response.json(data);
+  } catch (e) {
+    return apiError(e);
+  }
+}
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const auth = await authenticatedDb(request);
+    if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    const { id } = await params;
+    const { error } = await auth.db.from("services").delete().eq("id", id);
+    if (error) throw error;
+    return new Response(null, { status: 204 });
+  } catch (e) {
+    return apiError(e);
+  }
+}

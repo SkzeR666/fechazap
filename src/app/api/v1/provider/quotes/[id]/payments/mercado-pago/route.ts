@@ -1,2 +1,64 @@
-import { randomUUID } from 'node:crypto';import { env } from '@/src/config';import { mpPost } from '@/src/lib/mercado-pago';import { apiError,authenticatedDb } from '@/src/server/http';
-export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){try{const auth=await authenticatedDb(request);if(!auth)return Response.json({error:'unauthorized'},{status:401});const{id}=await params;const{data:q,error}=await auth.db.from('quotes').select('id,title,total_cents,status,customers(email,name)').eq('id',id).single();if(error)throw error;if(!['contracted','awaiting_payment'].includes(q.status))return Response.json({error:'payment_not_available'},{status:409});const customer=Array.isArray(q.customers)?q.customers[0]:q.customers;if(!customer?.email)return Response.json({error:'customer_email_required'},{status:422});const result=await mpPost('/v1/payments',{transaction_amount:q.total_cents/100,description:q.title??'Serviço FechaZap',payment_method_id:'pix',payer:{email:customer.email,first_name:customer.name},external_reference:q.id,notification_url:`${env().APP_URL}/api/webhooks/mercado-pago`},randomUUID()) as {id:number|string;status:string;point_of_interaction?:{transaction_data?:{qr_code?:string;qr_code_base64?:string;ticket_url?:string}}};await auth.db.from('payments').upsert({quote_id:q.id,status:'pending',provider:'mercado_pago',provider_reference:String(result.id),external_reference:q.id,amount_cents:q.total_cents,raw_status:result.status},{onConflict:'provider,provider_reference'});await auth.db.from('quotes').update({status:'awaiting_payment'}).eq('id',q.id);return Response.json({paymentId:result.id,status:result.status,pix:result.point_of_interaction?.transaction_data},{status:201})}catch(e){return apiError(e)}}
+import { createPixOrder } from "@/src/modules/payments/mercado-pago/orders";
+import { apiError, authenticatedDb } from "@/src/server/http";
+
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const auth = await authenticatedDb(request);
+    if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    const { id } = await params;
+    const { data: quote, error } = await auth.db
+      .from("quotes")
+      .select("id,total_cents,status,customers(email)")
+      .eq("id", id)
+      .single();
+    if (error) throw error;
+    if (!["contracted", "awaiting_payment"].includes(quote.status))
+      return Response.json({ error: "payment_not_available" }, { status: 409 });
+    const customer = Array.isArray(quote.customers)
+      ? quote.customers[0]
+      : quote.customers;
+    if (!customer?.email)
+      return Response.json(
+        { error: "customer_email_required" },
+        { status: 422 },
+      );
+
+    const order = await createPixOrder({
+      quoteId: quote.id,
+      amountCents: quote.total_cents,
+      email: customer.email,
+    });
+    const { error: paymentError } = await auth.db.from("payments").upsert(
+      {
+        quote_id: quote.id,
+        status: "pending",
+        provider: "mercado_pago",
+        provider_reference: order.orderId,
+        external_reference: quote.id,
+        amount_cents: quote.total_cents,
+        raw_status: `${order.status}:${order.statusDetail}`,
+      },
+      { onConflict: "provider,provider_reference" },
+    );
+    if (paymentError) throw paymentError;
+    const { error: quoteError } = await auth.db
+      .from("quotes")
+      .update({ status: "awaiting_payment" })
+      .eq("id", quote.id);
+    if (quoteError) throw quoteError;
+    return Response.json(
+      {
+        paymentId: order.orderId,
+        status: order.status,
+        statusDetail: order.statusDetail,
+        pix: order.pix,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    return apiError(error);
+  }
+}

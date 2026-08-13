@@ -1,69 +1,86 @@
 # FechaZap API
 
-Backend-first do FechaZap em Next.js App Router: página pública de serviços e funil de fechamento para profissionais autônomos. Este repositório ainda não contém frontend.
+Backend-first do FechaZap em Next.js App Router. O projeto não contém frontend nesta fase.
 
-## Escopo do V1
+## Serviços
 
-- Supabase Auth + Postgres com isolamento multi-tenant por RLS
-- perfil público e catálogo simples de serviços
-- solicitação pública de orçamento
-- funil auditável: pedido → orçamento → aceite → contrato → PIX → agenda → concluído
-- aceite com CPF cifrado (AES-256-GCM), hash e evidências técnicas
-- PIX manual; Mercado Pago fica apenas previsto no modelo de pagamentos
-- Route Handlers do Next.js prontos para Vercel
-- helpers Supabase SSR para browser, servidor e renovação de sessão via `proxy.ts`
-- Cloudflare restrito a Workers e arquivos privados no R2
+- `src/modules/auth`: autenticação e clientes Supabase com RLS.
+- `src/modules/files`: hierarquia de objetos e URLs HMAC do Worker Cloudflare.
+- `src/modules/payments`: API Orders, assinaturas e webhook do Mercado Pago.
+- `src/modules/platform`: contratos estritos de configuração por serviço.
+- `src/app/api`: camada HTTP fina implantada na Vercel.
+- `cloudflare/files-worker`: serviço isolado que é o único acesso ao bucket R2 privado.
+
+Não existem credenciais S3 na Vercel, aliases de variáveis, configuração Turnstile nem fallback entre segredos.
+
+## Funcionalidades
+
+- Supabase Auth, Postgres, RLS e isolamento multi-tenant.
+- CRUD de serviços, clientes, orçamentos e itens.
+- substituição transacional dos itens e recálculo do total.
+- máquina de estados auditável do orçamento.
+- aceite com CPF cifrado, hash e evidências técnicas.
+- contrato e PDF armazenados no R2 privado.
+- imagens, marcas e anexos organizados por usuário e cliente.
+- PIX manual e PIX pela API Orders do Mercado Pago.
+- assinatura e cancelamento dos planos do FechaZap.
+- webhook Mercado Pago idempotente e restrito à aplicação FechaZap.
+- oferta e escolha pública de horários.
+- rate limit persistente no Postgres.
+- cron de lembretes e links `wa.me`.
+- OpenAPI 3.1 em `/api/openapi`.
 
 ## Desenvolvimento
 
-Requisitos: Node 20+, Docker (para Supabase local) e contas Supabase/Vercel quando for publicar.
+Requisitos: Node.js 20+, Supabase CLI, Vercel CLI e Wrangler.
 
 ```bash
 npm install
-# .env.local já contém apenas as chaves públicas fornecidas; complete os segredos server-side
-npx supabase start
-npm run db:reset
+npx vercel env pull .env.local --environment=development --yes
+npm run typecheck
+npm run lint
 npm test
-npm run dev
+npm run build
 ```
 
-Gere `ACCEPTANCE_ENCRYPTION_KEY` sem imprimir ou versionar o valor. A variável deve conter 32 bytes em hexadecimal (64 caracteres). O arquivo `.env.local` é ignorado pelo Git.
+`.env.local` é ignorado pelo Git. A lista canônica de variáveis fica em `.env.example`.
 
-## API inicial
+## Rotas principais
 
-| Método | Rota | Acesso | Uso |
-|---|---|---|---|
-| GET | `/api/health` | público | healthcheck |
-| GET | `/api/v1/public/:slug` | público | perfil e serviços ativos |
-| POST | `/api/v1/public/:slug/requests` | público | novo pedido |
-| POST | `/api/v1/public/quotes/:token/accept` | token público | aceite do orçamento |
-| PUT | `/api/v1/provider/profile` | Supabase JWT | cria/atualiza perfil |
-| POST | `/api/v1/provider/services` | Supabase JWT | cria serviço |
-| GET | `/api/v1/provider/quotes` | Supabase JWT | lista funil |
-| POST | `/api/v1/provider/quotes` | Supabase JWT | cria fechamento direto |
-| GET/PUT/DELETE | `/api/v1/provider/quotes/:id` | Supabase JWT | detalhe, itens transacionais e exclusão |
-| POST | `/api/v1/provider/quotes/:id/transition` | Supabase JWT | muda status validando a máquina de estados |
-| POST | `/api/v1/provider/quotes/:id/contract` | Supabase JWT | gera contrato PDF privado no R2 |
-| POST | `/api/v1/provider/quotes/:id/appointments` | Supabase JWT | oferece horários |
-| POST | `/api/v1/provider/quotes/:id/payments/manual` | Supabase JWT | confirma PIX manual |
-| POST | `/api/v1/provider/quotes/:id/payments/mercado-pago` | Supabase JWT | cria cobrança PIX MP |
-| GET/POST | `/api/v1/provider/subscription` | Supabase JWT | consulta/cria assinatura SaaS |
-| POST | `/api/v1/provider/files/upload-url` | Supabase JWT | URL de upload R2 |
-| GET/DELETE | `/api/v1/provider/files/:id` | Supabase JWT | download assinado/exclusão |
-| POST | `/api/webhooks/mercado-pago` | assinatura MP | pagamento e assinatura idempotentes |
-| GET | `/api/cron/reminders` | `CRON_SECRET` | lembretes diários e links WhatsApp |
-| GET | `/api/openapi` | público | especificação OpenAPI 3.1 |
+| Método               | Rota                                                | Acesso                     |
+| -------------------- | --------------------------------------------------- | -------------------------- |
+| GET                  | `/api/health`                                       | público                    |
+| GET                  | `/api/openapi`                                      | público                    |
+| GET/PUT              | `/api/v1/provider/profile`                          | Supabase JWT               |
+| GET/POST             | `/api/v1/provider/services`                         | Supabase JWT               |
+| PATCH/DELETE         | `/api/v1/provider/services/:id`                     | Supabase JWT               |
+| GET/POST             | `/api/v1/provider/quotes`                           | Supabase JWT               |
+| GET/PUT/PATCH/DELETE | `/api/v1/provider/quotes/:id`                       | Supabase JWT               |
+| POST                 | `/api/v1/provider/quotes/:id/transition`            | Supabase JWT               |
+| POST                 | `/api/v1/provider/quotes/:id/contract`              | Supabase JWT               |
+| POST                 | `/api/v1/provider/quotes/:id/appointments`          | Supabase JWT               |
+| POST                 | `/api/v1/provider/quotes/:id/payments/manual`       | Supabase JWT               |
+| POST                 | `/api/v1/provider/quotes/:id/payments/mercado-pago` | Supabase JWT               |
+| GET/POST/DELETE      | `/api/v1/provider/subscription`                     | Supabase JWT               |
+| POST                 | `/api/v1/provider/files/upload-url`                 | Supabase JWT               |
+| GET/DELETE           | `/api/v1/provider/files/:id`                        | Supabase JWT               |
+| GET                  | `/api/v1/public/:slug`                              | público                    |
+| POST                 | `/api/v1/public/:slug/requests`                     | público + rate limit       |
+| POST                 | `/api/v1/public/quotes/:token/accept`               | token público + rate limit |
+| POST                 | `/api/v1/public/quotes/:token/appointments/:id`     | token público              |
+| POST                 | `/api/webhooks/mercado-pago`                        | assinatura Mercado Pago    |
+| GET                  | `/api/cron/reminders`                               | `CRON_SECRET`              |
 
-O header das rotas do prestador é `Authorization: Bearer <access_token>`.
+## Infraestrutura
 
-As rotas públicas de pedido e aceite possuem rate limit persistente. O formulário de pedido valida Turnstile quando `CLOUDFLARE_TURNSTILE_SECRET_KEY` estiver configurada. Lembretes geram links `wa.me`; o V1 não envia mensagens automaticamente.
+- Produção: `https://fechazap.vercel.app`
+- Worker de arquivos: `https://fechazap-files.projectcore.workers.dev`
+- Bucket: `fechazap-files` (privado)
+- Hierarquia R2:
+  - `users/<user-id>/brand/logos/`
+  - `users/<user-id>/customers/<customer-id>/images/`
+  - `users/<user-id>/customers/<customer-id>/attachments/`
+  - `users/<user-id>/customers/<customer-id>/quotes/<quote-id>/pdfs/`
+  - `users/<user-id>/customers/<customer-id>/quotes/<quote-id>/contracts/`
 
-## Publicação segura
-
-1. Crie o projeto no Supabase e rode `npx supabase link` e `npm run db:push`.
-2. Importe o repositório na Vercel como **Next.js / App Router** e configure as variáveis de `.env.example`.
-3. Hospede frontend e backend na Vercel; a API recebe o slug explicitamente.
-4. No Cloudflare, o Worker `fechazap-files` atende uploads/downloads temporários no bucket R2 privado. Não use Pages, D1 ou KV para o FechaZap.
-5. Só depois rode o servidor ou publique. Nunca use a service role no navegador.
-
-Consulte [docs/architecture.md](docs/architecture.md) para decisões e próximos módulos.
+O webhook da FragBase pertence a outra aplicação Mercado Pago e não faz parte deste projeto.
