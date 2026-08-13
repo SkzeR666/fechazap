@@ -8,7 +8,18 @@ type WebhookBody = {
   action?: string;
   application_id?: string | number;
   live_mode?: boolean;
-  data?: { id?: string | number };
+  data?: {
+    id?: string | number;
+    status?: string;
+    status_detail?: string;
+    external_reference?: string;
+  };
+};
+
+type MercadoPagoOrder = {
+  status: string;
+  status_detail?: string;
+  external_reference?: string;
 };
 
 const mapOrderStatus = (status: string) => {
@@ -75,11 +86,15 @@ export async function processMercadoPagoWebhook(request: Request) {
     }
 
     if (body.type === "order") {
-      const order = (await mpGet(`/v1/orders/${dataId}`)) as {
-        status: string;
-        status_detail?: string;
-        external_reference?: string;
-      };
+      // Dashboard simulations embed the complete synthetic order. Production
+      // notifications normally carry only data.id and are fetched from MP.
+      const order: MercadoPagoOrder = body.data?.status
+        ? {
+            status: body.data.status,
+            status_detail: body.data.status_detail,
+            external_reference: body.data.external_reference,
+          }
+        : ((await mpGet(`/v1/orders/${dataId}`)) as MercadoPagoOrder);
       const status = mapOrderStatus(order.status);
       const { error: paymentError } = await db
         .from("payments")
