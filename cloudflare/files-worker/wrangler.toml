@@ -1,0 +1,8 @@
+name = "fechazap-files"
+main = "src/index.js"
+compatibility_date = "2026-08-13"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "fechazap-files"

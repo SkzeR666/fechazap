@@ -12,7 +12,7 @@
 - R2 guarda logos, anexos, contratos e PDFs usando prefixos por prestador (`providers/<user-id>/...`).
 - Metadados e autorização continuam no Postgres; R2 não é fonte de verdade do negócio.
 - O backend na Vercel emite autorização curta para upload/download. Nenhuma credencial S3 chega ao navegador.
-- Um Worker será criado somente junto do primeiro fluxo real de arquivo para validar assinatura, tamanho, MIME e chave/prefixo.
+- O Worker `fechazap-files` recebe URLs HMAC temporárias, valida expiração, método, MIME, tamanho máximo e prefixo antes de acessar o binding privado do R2.
 - URLs públicas permanentes e `r2.dev` ficam desabilitados; documentos pessoais são sempre privados.
 - Workers não processam pagamentos nem substituem os Route Handlers da Vercel.
 

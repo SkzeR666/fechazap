@@ -63,7 +63,7 @@ As rotas públicas de pedido e aceite possuem rate limit persistente. O formulá
 1. Crie o projeto no Supabase e rode `npx supabase link` e `npm run db:push`.
 2. Importe o repositório na Vercel como **Next.js / App Router** e configure as variáveis de `.env.example`.
 3. Hospede frontend e backend na Vercel; a API recebe o slug explicitamente.
-4. No Cloudflare, use apenas Worker de arquivos + bucket R2 privado. Não use Pages, D1 ou KV para o FechaZap.
+4. No Cloudflare, o Worker `fechazap-files` atende uploads/downloads temporários no bucket R2 privado. Não use Pages, D1 ou KV para o FechaZap.
 5. Só depois rode o servidor ou publique. Nunca use a service role no navegador.
 
 Consulte [docs/architecture.md](docs/architecture.md) para decisões e próximos módulos.

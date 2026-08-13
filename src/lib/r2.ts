@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../config';
@@ -19,6 +20,22 @@ export async function signedDownload(key: string) {
   const c = settings();
   return getSignedUrl(client(), new GetObjectCommand({ Bucket: c.CLOUDFLARE_R2_BUCKET, Key: key }), { expiresIn: 300 });
 }
+function workerUrl(method: string, key: string, contentType: string, ttl: number) {
+  const c = env();
+  const base = c.CLOUDFLARE_FILES_WORKER_URL;
+  const secret = c.CLOUDFLARE_FILES_WORKER_SECRET ?? c.CRON_SECRET;
+  if (!base || !secret) return null;
+  const expires = Math.floor(Date.now() / 1000) + ttl;
+  const signature = createHmac('sha256', secret).update(`${method}\n${key}\n${expires}\n${contentType}`).digest('hex');
+  const path = key.split('/').map(encodeURIComponent).join('/');
+  const url = new URL(`/files/${path}`, base);
+  url.searchParams.set('expires', String(expires));
+  url.searchParams.set('signature', signature);
+  url.searchParams.set('contentType', contentType);
+  return url.toString();
+}
+export function fileUploadUrl(key: string, contentType: string) { return workerUrl('PUT', key, contentType, 600); }
+export function fileDownloadUrl(key: string) { return workerUrl('GET', key, '', 300); }
 export async function putFile(key: string, body: Uint8Array, contentType: string) {
   const c = settings();
   await client().send(new PutObjectCommand({ Bucket: c.CLOUDFLARE_R2_BUCKET, Key: key, Body: body, ContentType: contentType }));

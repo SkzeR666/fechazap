@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --local > src/lib/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/lib/database.types.ts",
+    "cf:deploy:files": "wrangler deploy --config cloudflare/files-worker/wrangler.toml"
   },
   "engines": { "node": ">=20" },
   "dependencies": {
