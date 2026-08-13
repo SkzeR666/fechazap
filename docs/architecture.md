@@ -30,9 +30,4 @@ A service role só é usada pela API para operações públicas estritamente enc
 
 ## Próximos incrementos de backend
 
-1. CRUD completo de itens do orçamento e recálculo transacional do total.
-2. Geração determinística de contrato/PDF e armazenamento privado.
-3. Oferta/seleção de horários com prevenção de conflito.
-4. Turnstile e rate limiting nas duas rotas públicas.
-5. Webhook idempotente do Mercado Pago, apenas após validar demanda por parcelamento.
-6. Testes locais de integração contra Supabase e contrato OpenAPI.
+Implementado no backend: CRUD de serviços/orçamentos, troca transacional de itens e totais, contrato PDF, R2 privado, oferta/seleção de horários, PIX manual, cobrança PIX Mercado Pago, assinatura SaaS, webhook idempotente, rate limit, Turnstile opcional, OpenAPI, cron e links WhatsApp. Antes de produção ainda é obrigatório aplicar migrations, cadastrar variáveis Vercel e configurar a assinatura do webhook no painel Mercado Pago.

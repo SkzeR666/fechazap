@@ -1,0 +1,3 @@
+import { z } from 'zod'; import { apiError,authenticatedDb } from '@/src/server/http';
+const schema=z.object({slots:z.array(z.string().datetime()).min(2).max(5)});
+export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){try{const auth=await authenticatedDb(request);if(!auth)return Response.json({error:'unauthorized'},{status:401});const[{id},body]=await Promise.all([params,request.json().then(v=>schema.parse(v))]);await auth.db.from('appointments').delete().eq('quote_id',id).eq('status','offered');const{data,error}=await auth.db.from('appointments').insert(body.slots.map(starts_at=>({quote_id:id,starts_at,status:'offered'}))).select();if(error)throw error;return Response.json({data},{status:201})}catch(e){return apiError(e)}}

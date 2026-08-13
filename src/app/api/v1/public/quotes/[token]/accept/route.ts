@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import { protectCpf } from '@/src/lib/crypto';
 import { adminDb } from '@/src/lib/supabase';
-import { apiError } from '@/src/server/http';
+import { apiError,rateLimit } from '@/src/server/http';
 
 const schema = z.object({ name: z.string().trim().min(2).max(120), cpf: z.string().transform((v) => v.replace(/\D/g, '')).pipe(z.string().length(11)) });
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
+    if(!await rateLimit(request,'quote-accept',10,300))return Response.json({error:'rate_limited'},{status:429});
     const [{ token }, body] = await Promise.all([params, request.json().then((value) => schema.parse(value))]);
     const cpf = protectCpf(body.cpf);
     const { data, error } = await adminDb().rpc('accept_quote', {

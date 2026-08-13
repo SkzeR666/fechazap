@@ -40,9 +40,23 @@ Gere `ACCEPTANCE_ENCRYPTION_KEY` sem imprimir ou versionar o valor. A variável 
 | PUT | `/api/v1/provider/profile` | Supabase JWT | cria/atualiza perfil |
 | POST | `/api/v1/provider/services` | Supabase JWT | cria serviço |
 | GET | `/api/v1/provider/quotes` | Supabase JWT | lista funil |
+| POST | `/api/v1/provider/quotes` | Supabase JWT | cria fechamento direto |
+| GET/PUT/DELETE | `/api/v1/provider/quotes/:id` | Supabase JWT | detalhe, itens transacionais e exclusão |
 | POST | `/api/v1/provider/quotes/:id/transition` | Supabase JWT | muda status validando a máquina de estados |
+| POST | `/api/v1/provider/quotes/:id/contract` | Supabase JWT | gera contrato PDF privado no R2 |
+| POST | `/api/v1/provider/quotes/:id/appointments` | Supabase JWT | oferece horários |
+| POST | `/api/v1/provider/quotes/:id/payments/manual` | Supabase JWT | confirma PIX manual |
+| POST | `/api/v1/provider/quotes/:id/payments/mercado-pago` | Supabase JWT | cria cobrança PIX MP |
+| GET/POST | `/api/v1/provider/subscription` | Supabase JWT | consulta/cria assinatura SaaS |
+| POST | `/api/v1/provider/files/upload-url` | Supabase JWT | URL de upload R2 |
+| GET/DELETE | `/api/v1/provider/files/:id` | Supabase JWT | download assinado/exclusão |
+| POST | `/api/webhooks/mercado-pago` | assinatura MP | pagamento e assinatura idempotentes |
+| GET | `/api/cron/reminders` | `CRON_SECRET` | lembretes diários e links WhatsApp |
+| GET | `/api/openapi` | público | especificação OpenAPI 3.1 |
 
 O header das rotas do prestador é `Authorization: Bearer <access_token>`.
+
+As rotas públicas de pedido e aceite possuem rate limit persistente. O formulário de pedido valida Turnstile quando `CLOUDFLARE_TURNSTILE_SECRET_KEY` estiver configurada. Lembretes geram links `wa.me`; o V1 não envia mensagens automaticamente.
 
 ## Publicação segura
 

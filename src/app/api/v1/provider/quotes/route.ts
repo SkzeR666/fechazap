@@ -14,3 +14,6 @@ export async function GET(request: Request) {
     return Response.json({ data });
   } catch (error) { return apiError(error); }
 }
+
+const createSchema=z.object({customer:z.object({name:z.string().min(2).max(120),phone:z.string().min(8).max(30),email:z.string().email().optional()}),title:z.string().min(1).max(200).optional(),message:z.string().max(2000).optional()});
+export async function POST(request:Request){try{const auth=await authenticatedDb(request);if(!auth)return Response.json({error:'unauthorized'},{status:401});const body=createSchema.parse(await request.json());const{data:customer,error:customerError}=await auth.db.from('customers').upsert({user_id:auth.user.id,...body.customer},{onConflict:'user_id,phone'}).select().single();if(customerError)throw customerError;const{data,error}=await auth.db.from('quotes').insert({user_id:auth.user.id,customer_id:customer.id,title:body.title,message:body.message,status:'draft'}).select().single();if(error)throw error;return Response.json(data,{status:201})}catch(e){return apiError(e)}}

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { userDb } from '../lib/supabase';
+import { adminDb } from '../lib/supabase';
 
 export function apiError(error: unknown) {
   console.error(error);
@@ -15,3 +16,5 @@ export async function authenticatedDb(request: Request) {
   if (error || !user) return null;
   return { db, user };
 }
+
+export async function rateLimit(request:Request,scope:string,limit=10,windowSeconds=60){const ip=request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()??'unknown';const{data,error}=await adminDb().rpc('consume_rate_limit',{p_key:`${scope}:${ip}`,p_limit:limit,p_window_seconds:windowSeconds});if(error)throw error;return data===true}
