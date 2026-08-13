@@ -6,7 +6,7 @@ alter table public.quotes add column if not exists contract_generated_at timesta
 alter table public.payments add column if not exists external_reference text;
 alter table public.payments add column if not exists raw_status text;
 alter table public.payments add column if not exists updated_at timestamptz not null default now();
-create unique index if not exists payments_provider_reference_uidx on public.payments(provider,provider_reference) where provider_reference is not null;
+alter table public.payments add constraint payments_provider_reference_unique unique(provider,provider_reference);
 
 create table public.documents (
   id uuid primary key default gen_random_uuid(), user_id uuid not null references public.profiles(user_id) on delete cascade,
@@ -35,6 +35,39 @@ create table public.api_rate_limits (
   primary key(key,window_start)
 );
 create index reminders_due_idx on public.reminders(due_at) where delivered_at is null;
+
+create or replace function public.enforce_monthly_quote_limit() returns trigger language plpgsql set search_path=public as $$
+declare current_plan public.plan_code; monthly_count integer;
+begin
+  perform pg_advisory_xact_lock(hashtextextended(new.user_id::text,0));
+  select plan into current_plan from public.profiles where user_id=new.user_id;
+  if current_plan='free' then
+    select count(*) into monthly_count from public.quotes where user_id=new.user_id and created_at>=date_trunc('month',now());
+    if monthly_count>=3 then raise exception 'monthly_limit_reached' using errcode='P0001'; end if;
+  end if;
+  return new;
+end $$;
+create trigger quotes_monthly_limit before insert on public.quotes for each row execute function public.enforce_monthly_quote_limit();
+
+create or replace function public.schedule_quote_reminders() returns trigger language plpgsql set search_path=public as $$
+begin
+  if new.status='sent' and old.status is distinct from new.status then
+    insert into public.reminders(quote_id,kind,due_at) values(new.id,'quote_expiring',coalesce(new.expires_at,now()+interval '3 days')-interval '1 day') on conflict do nothing;
+  elsif new.status='awaiting_payment' and old.status is distinct from new.status then
+    insert into public.reminders(quote_id,kind,due_at) values(new.id,'payment_pending',now()+interval '1 day') on conflict do nothing;
+  end if;
+  return new;
+end $$;
+create trigger quotes_schedule_reminders after update of status on public.quotes for each row execute function public.schedule_quote_reminders();
+
+create or replace function public.schedule_appointment_reminder() returns trigger language plpgsql set search_path=public as $$
+begin
+  if new.status='selected' and old.status is distinct from new.status then
+    insert into public.reminders(quote_id,kind,due_at) values(new.quote_id,'appointment_upcoming',new.starts_at-interval '1 day') on conflict do nothing;
+  end if;
+  return new;
+end $$;
+create trigger appointments_schedule_reminder after update of status on public.appointments for each row execute function public.schedule_appointment_reminder();
 
 alter table public.documents enable row level security;
 alter table public.subscriptions enable row level security;
