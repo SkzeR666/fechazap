@@ -29,6 +29,11 @@ const mapOrderStatus = (status: string) => {
   return "pending";
 };
 
+const isUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+
 export async function processMercadoPagoWebhook(request: Request) {
   const url = new URL(request.url);
   const body = (await request.json()) as WebhookBody;
@@ -107,7 +112,11 @@ export async function processMercadoPagoWebhook(request: Request) {
         .eq("provider", "mercado_pago")
         .eq("provider_reference", dataId);
       if (paymentError) throw paymentError;
-      if (status === "paid" && order.external_reference) {
+      if (
+        status === "paid" &&
+        order.external_reference &&
+        isUuid(order.external_reference)
+      ) {
         const { error: quoteError } = await db
           .from("quotes")
           .update({ status: "paid" })
