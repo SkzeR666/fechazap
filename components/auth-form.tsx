@@ -10,17 +10,25 @@ import { Field } from "@/components/field";
 import { createClient } from "@/lib/supabase/client";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { appFrame } from "@/lib/utils";
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(12),
 });
 
 export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/dashboard";
+  const requestedNext = searchParams.get("next");
+  const next =
+    (requestedNext?.startsWith("/app") ||
+      requestedNext?.startsWith("/dashboard")) &&
+    !requestedNext.startsWith("//")
+      ? requestedNext
+      : "/app";
   const [error, setError] = useState<string | null>(null);
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(formData: FormData) {
@@ -30,7 +38,7 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
       password: formData.get("password"),
     });
     if (!parsed.success) {
-      setError("Informe e-mail válido e senha com pelo menos 8 caracteres.");
+      setError("Informe e-mail válido e senha com pelo menos 12 caracteres.");
       return;
     }
     setPending(true);
@@ -38,7 +46,10 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
     const result =
       mode === "login"
         ? await supabase.auth.signInWithPassword(parsed.data)
-        : await supabase.auth.signUp(parsed.data);
+        : await supabase.auth.signUp({
+            ...parsed.data,
+            options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+          });
     setPending(false);
     if (result.error) {
       setError(
@@ -48,6 +59,10 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
       );
       return;
     }
+    if (mode === "cadastro" && !result.data.session) {
+      setConfirmationSent(true);
+      return;
+    }
     router.replace(mode === "cadastro" ? "/onboarding" : next);
     router.refresh();
   }
@@ -55,13 +70,23 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
+      <main className={`${appFrame} flex flex-1 flex-col justify-center py-16`}>
+      <div className="mx-auto w-full max-w-md">
       <p className="font-mono text-sm tracking-widest text-primary uppercase">
         FechaZap
       </p>
       <h1 className="mt-4 text-3xl font-semibold">
         {mode === "login" ? "Entrar" : "Criar conta"}
       </h1>
+      {confirmationSent ? (
+        <div className="mt-8 rounded-xl border bg-card p-5" role="status">
+          <h2 className="font-semibold">Confirme seu e-mail</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Enviamos um link de confirmação. Abra-o no mesmo navegador para
+            continuar o cadastro com segurança.
+          </p>
+        </div>
+      ) : (
       <form action={onSubmit} className="mt-8 grid gap-4">
         <Field label="E-mail" htmlFor="email">
           <Input id="email" name="email" type="email" autoComplete="email" required />
@@ -73,7 +98,7 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
             type="password"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             required
-            minLength={8}
+            minLength={12}
           />
         </Field>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -81,9 +106,10 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
           {pending ? "Aguarde..." : mode === "login" ? "Entrar" : "Cadastrar"}
         </Button>
       </form>
+      )}
       {mode === "login" ? (
         <p className="mt-3 text-sm">
-          <Link href="/esqueci-senha" className="text-primary underline">
+          <Link href="/recuperar-senha" className="text-primary underline">
             Esqueci a senha
           </Link>
         </p>
@@ -92,14 +118,14 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
         {mode === "login" ? (
           <>
             Novo por aqui?{" "}
-            <Link href="/cadastro" className="text-primary underline">
+            <Link href="/criar-conta" className="text-primary underline">
               Criar conta
             </Link>
           </>
         ) : (
           <>
             Já tem conta?{" "}
-            <Link href="/login" className="text-primary underline">
+            <Link href="/entrar" className="text-primary underline">
               Entrar
             </Link>
             . Ao criar a conta você aceita os{" "}
@@ -114,6 +140,7 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
           </>
         )}
       </p>
+      </div>
       </main>
       <SiteFooter />
     </div>

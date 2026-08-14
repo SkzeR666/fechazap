@@ -7,7 +7,7 @@ describe("public URLs", () => {
       "https://fechazap.com/joao",
     );
     expect(publicQuoteUrl("joao", "abc", "https://fechazap.com")).toBe(
-      "https://fechazap.com/joao/o/abc",
+      "https://fechazap.com/f/abc",
     );
   });
 });

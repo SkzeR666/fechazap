@@ -14,7 +14,8 @@ import { useAccessToken } from "@/hooks/use-access-token";
 import { useProfile } from "@/hooks/use-profile";
 import { BRAND_COLORS, logoUrl, slugify } from "@/lib/format";
 import { api } from "@/src/lib/api/client";
-import { cn } from "@/lib/utils";
+import { appFrame, cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const profileSchema = z.object({
   businessName: z.string().trim().min(2).max(120),
@@ -112,7 +113,13 @@ export default function OnboardingPage() {
   if (!ready) return null;
 
   return (
-    <main className="mx-auto min-h-screen max-w-lg px-6 py-12">
+    <main className="min-h-screen">
+      <div className={cn(appFrame, "flex items-center justify-between py-4")}>
+        <p className="font-heading text-lg font-semibold">FechaZap</p>
+        <ThemeToggle />
+      </div>
+      <div className={appFrame}>
+      <div className="max-w-lg pb-12">
       <p className="font-mono text-sm tracking-widest text-primary uppercase">
         Onboarding
       </p>
@@ -292,6 +299,8 @@ export default function OnboardingPage() {
           </Button>
         </div>
       ) : null}
+      </div>
+      </div>
     </main>
   );
 }

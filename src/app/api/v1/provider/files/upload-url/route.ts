@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { fileKey, type FileCategory } from "@/src/modules/files/keys";
 import { createUploadUrl } from "@/src/modules/files/service";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import {
+  apiError,
+  authenticatedDb,
+  rateLimit,
+  validatedJson,
+} from "@/src/server/http";
 
 const schema = z.object({
   kind: z.enum(["brand", "image", "attachment", "quote_pdf"]),
@@ -26,7 +31,9 @@ export async function POST(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
-    const body = schema.parse(await request.json());
+    if (!(await rateLimit(request, "file-upload", 30, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
+    const body = await validatedJson(request, schema, 4_096);
     if (body.kind !== "brand" && !body.quoteId)
       return Response.json({ error: "quote_id_required" }, { status: 422 });
     if (body.kind === "quote_pdf" && body.contentType !== "application/pdf")

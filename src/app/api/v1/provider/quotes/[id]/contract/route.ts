@@ -1,7 +1,7 @@
 import { contractPdf } from "@/src/lib/pdf";
 import { fileKey } from "@/src/modules/files/keys";
 import { createDownloadUrl, uploadFile } from "@/src/modules/files/service";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import { apiError, authenticatedDb, rateLimit } from "@/src/server/http";
 
 export async function POST(
   request: Request,
@@ -10,6 +10,8 @@ export async function POST(
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    if (!(await rateLimit(request, "contract-generate", 20, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
     const { id } = await params;
     const { data: quote, error } = await auth.db
       .from("quotes")

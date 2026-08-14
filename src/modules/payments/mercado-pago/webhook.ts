@@ -1,21 +1,28 @@
 import { adminDb } from "../../auth/supabase";
+import { validatedJson } from "@/src/server/http";
+import { z } from "zod";
 import { mercadoPagoWebhookEnv } from "../../platform/env";
 import { mpGet, mpGetAs, validMpSignature } from "./client";
 import { sellerAccessToken } from "./connect";
 
-type WebhookBody = {
-  id?: string | number;
-  type?: string;
-  action?: string;
-  application_id?: string | number;
-  live_mode?: boolean;
-  data?: {
-    id?: string | number;
-    status?: string;
-    status_detail?: string;
-    external_reference?: string;
-  };
-};
+const webhookSchema = z
+  .object({
+    id: z.union([z.string(), z.number()]).optional(),
+    type: z.string().max(100).optional(),
+    action: z.string().max(100).optional(),
+    application_id: z.union([z.string(), z.number()]).optional(),
+    live_mode: z.boolean().optional(),
+    data: z
+      .object({
+        id: z.union([z.string(), z.number()]).optional(),
+        status: z.string().max(100).optional(),
+        status_detail: z.string().max(200).optional(),
+        external_reference: z.string().max(200).optional(),
+      })
+      .passthrough()
+      .optional(),
+  })
+  .passthrough();
 
 type MercadoPagoOrder = {
   status: string;
@@ -37,7 +44,7 @@ const isUuid = (value: string) =>
 
 export async function processMercadoPagoWebhook(request: Request) {
   const url = new URL(request.url);
-  const body = (await request.json()) as WebhookBody;
+  const body = await validatedJson(request, webhookSchema, 32_768);
   const dataId =
     url.searchParams.get("data.id") ??
     url.searchParams.get("data_id") ??

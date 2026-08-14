@@ -5,30 +5,33 @@ import { ProductPreview } from "@/components/marketing/product-preview";
 import { Card } from "@/components/ui/card";
 import { Carimbo } from "@/components/carimbo";
 import { Money } from "@/components/money";
+import { appFrame } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Preview — FechaZap",
   description:
-    "Veja a vitrine do prestador e o recibo que o cliente aceita, paga e agenda.",
+    "Veja o fechamento que o cliente aceita, paga e agenda — sem criar conta.",
 };
 
 const TIMELINE = [
   { stamp: false, label: "ENVIADO", detail: "Link no WhatsApp" },
-  { stamp: true, label: "ACEITO", detail: "13/08 16:53" },
-  { stamp: true, label: "PAGO", detail: "PIX confirmado" },
+  { stamp: true, label: "ACEITOU", detail: "13/08 16:53" },
+  { stamp: true, label: "SINAL PAGO", detail: "PIX confirmado" },
   { stamp: true, label: "AGENDADO", detail: "15/08 08:00" },
 ];
 
 export default function PreviewPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16">
+    <div className={`${appFrame} py-16`}>
       <p className="font-mono text-sm tracking-widest text-primary uppercase">
         Preview
       </p>
-      <h1 className="mt-3 text-4xl font-semibold">O cliente não baixa nada.</h1>
+      <h1 className="mt-3 text-4xl font-semibold">
+        O cliente abre o link. Fecha. Sem conta.
+      </h1>
       <p className="mt-3 max-w-xl text-muted-foreground">
-        Abre o seu link, vê o serviço, aceita o valor, paga no PIX e marca o
-        horário. Você acompanha no dashboard com o mesmo carimbo.
+        Você monta o fechamento e manda no WhatsApp. O cliente vê a proposta,
+        aceita, paga o sinal e agenda o horário — tudo no mesmo link.
       </p>
 
       <div className="mt-10">
@@ -79,13 +82,13 @@ export default function PreviewPage() {
           </p>
         </div>
         <div className="mt-6 rounded-md bg-accent px-3 py-2.5 text-center text-sm font-medium text-accent-foreground">
-          Gerar link
+          Enviar fechamento
         </div>
       </Card>
 
       <div className="mt-10 flex flex-col gap-3 sm:flex-row">
         <Button asChild variant="accent" className="h-11">
-          <Link href="/cadastro">Criar minha página</Link>
+          <Link href="/criar-conta">Criar meu primeiro fechamento</Link>
         </Button>
         <Button asChild variant="outline" className="h-11">
           <Link href="/precos">Ver preços</Link>

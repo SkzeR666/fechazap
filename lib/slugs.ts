@@ -2,6 +2,10 @@ export const RESERVED_SLUGS = new Set([
   "www",
   "api",
   "app",
+  "f",
+  "entrar",
+  "criar-conta",
+  "recuperar-senha",
   "login",
   "cadastro",
   "dashboard",
@@ -13,6 +17,7 @@ export const RESERVED_SLUGS = new Set([
   "autonomos",
   "termos",
   "privacidade",
+  "ajuda",
   "esqueci-senha",
   "redefinir-senha",
 ]);

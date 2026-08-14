@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NarrowPage } from "@/components/narrow-page";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -64,17 +65,17 @@ export default function PublicQuoteRequestPage() {
 
   if (sent) {
     return (
-      <main className="mx-auto max-w-md px-4 py-16 text-center">
+      <NarrowPage className="text-center">
         <h1 className="text-2xl font-semibold">Pedido enviado</h1>
         <p className="mt-3 text-muted-foreground">
           O prestador vai montar o orçamento e te enviar o link.
         </p>
-      </main>
+      </NarrowPage>
     );
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
+    <NarrowPage>
       <h1 className="text-2xl font-semibold">Pedir orçamento</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {profile.data?.businessName}
@@ -114,6 +115,6 @@ export default function PublicQuoteRequestPage() {
           {pending ? "Enviando..." : "Enviar pedido"}
         </Button>
       </form>
-    </main>
+    </NarrowPage>
   );
 }

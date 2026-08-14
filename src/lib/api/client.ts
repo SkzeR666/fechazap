@@ -2,6 +2,8 @@ import type { QuoteStatus } from "@/src/domain/quote-state";
 import type {
   ApiErrorBody,
   CreateQuoteInput,
+  AvailabilityExceptionRow,
+  AvailabilityRuleRow,
   CustomerRow,
   ProfileInput,
   ProfileRow,
@@ -117,6 +119,11 @@ export const api = {
         method: "DELETE",
         token,
       }),
+    customer: (token: string, id: string) =>
+      request<CustomerRow>(
+        `/api/v1/provider/customers/${encodeURIComponent(id)}`,
+        { token },
+      ),
     services: (token: string) =>
       request<{ data: ServiceRow[] }>("/api/v1/provider/services", { token }),
     createService: (token: string, body: ServiceInput) =>
@@ -245,6 +252,37 @@ export const api = {
         method: "DELETE",
         token,
       }),
+    availabilityRules: (token: string) =>
+      request<{ data: AvailabilityRuleRow[] }>(
+        "/api/v1/provider/availability/rules",
+        { token },
+      ),
+    saveAvailabilityRules: (
+      token: string,
+      rules: Array<{
+        weekday: number;
+        startTime: string | null;
+        endTime: string | null;
+        enabled: boolean;
+      }>,
+    ) =>
+      request<{ data: AvailabilityRuleRow[] }>(
+        "/api/v1/provider/availability/rules",
+        { method: "PUT", token, body: { rules } },
+      ),
+    availabilityExceptions: (token: string) =>
+      request<{ data: AvailabilityExceptionRow[] }>(
+        "/api/v1/provider/availability/exceptions",
+        { token },
+      ),
+    createAvailabilityException: (
+      token: string,
+      body: { startsAt: string; endsAt: string; reason?: string },
+    ) =>
+      request<AvailabilityExceptionRow>(
+        "/api/v1/provider/availability/exceptions",
+        { method: "POST", token, body },
+      ),
   },
 };
 

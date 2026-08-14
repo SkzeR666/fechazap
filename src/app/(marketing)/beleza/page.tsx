@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "FechaZap pra beleza",
   description:
     "Página de serviços pra manicure, lash, maquiadora e cabeleireiro. Cliente vê o preço e fecha no link.",
+  alternates: { canonical: "/beleza" },
 };
 
 export default function BelezaPage() {

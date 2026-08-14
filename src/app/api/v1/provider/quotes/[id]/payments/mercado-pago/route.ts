@@ -1,6 +1,7 @@
 import { createPixOrder } from "@/src/modules/payments/mercado-pago/orders";
 import { sellerAccessToken } from "@/src/modules/payments/mercado-pago/connect";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import { adminDb } from "@/src/modules/auth/supabase";
+import { apiError, authenticatedDb, rateLimit } from "@/src/server/http";
 
 export async function POST(
   request: Request,
@@ -9,6 +10,8 @@ export async function POST(
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    if (!(await rateLimit(request, "pix-create", 12, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
     const { id } = await params;
     const { data: quote, error } = await auth.db
       .from("quotes")
@@ -52,7 +55,8 @@ export async function POST(
       amountCents: quote.total_cents,
       email: customer.email,
     });
-    const { error: paymentError } = await auth.db.from("payments").upsert(
+    const db = adminDb();
+    const { error: paymentError } = await db.from("payments").upsert(
       {
         quote_id: quote.id,
         status: "pending",
@@ -67,7 +71,7 @@ export async function POST(
       { onConflict: "provider,provider_reference" },
     );
     if (paymentError) throw paymentError;
-    const { error: quoteError } = await auth.db
+    const { error: quoteError } = await db
       .from("quotes")
       .update({ status: "awaiting_payment" })
       .eq("id", quote.id);

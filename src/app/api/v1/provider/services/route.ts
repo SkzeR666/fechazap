@@ -5,6 +5,7 @@ const schema = z.object({
   name: z.string().trim().min(2).max(120),
   description: z.string().trim().max(1000).optional(),
   priceCents: z.number().int().nonnegative().nullable().optional(),
+  durationMinutes: z.number().int().positive().max(24 * 60).nullable().optional(),
   active: z.boolean().default(true),
   sortOrder: z.number().int().default(0),
 });
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
         name: body.name,
         description: body.description,
         price_cents: body.priceCents,
+        duration_minutes: body.durationMinutes,
         active: body.active,
         sort_order: body.sortOrder,
       })

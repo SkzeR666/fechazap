@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { adminDb } from "@/src/modules/auth/supabase";
-import { apiError, rateLimit } from "@/src/server/http";
+import { apiError, rateLimit, validatedJson } from "@/src/server/http";
 
 const schema = z.object({
   customer: z.object({
@@ -19,7 +19,7 @@ export async function POST(
   try {
     const [{ slug }, body] = await Promise.all([
       params,
-      request.json().then((value) => schema.parse(value)),
+      validatedJson(request, schema, 8_192),
     ]);
     if (!(await rateLimit(request, "quote-request", 5, 300)))
       return Response.json({ error: "rate_limited" }, { status: 429 });

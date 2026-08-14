@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/onboarding"];
-const AUTH_PAGES = ["/login", "/cadastro"];
+const PROTECTED = ["/app", "/dashboard", "/onboarding"];
+const AUTH_PAGES = ["/entrar", "/criar-conta", "/login", "/cadastro"];
 
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -36,14 +36,14 @@ export async function proxy(request: NextRequest) {
     PROTECTED.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
   ) {
     const redirect = request.nextUrl.clone();
-    redirect.pathname = "/login";
+    redirect.pathname = "/entrar";
     redirect.searchParams.set("next", path);
     return NextResponse.redirect(redirect);
   }
 
   if (authed && AUTH_PAGES.includes(path)) {
     const redirect = request.nextUrl.clone();
-    redirect.pathname = "/dashboard";
+    redirect.pathname = "/app";
     return NextResponse.redirect(redirect);
   }
 

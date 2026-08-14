@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectCpf } from "@/src/lib/crypto";
 import { adminDb } from "@/src/modules/auth/supabase";
-import { apiError, rateLimit } from "@/src/server/http";
+import { apiError, rateLimit, validatedJson } from "@/src/server/http";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -20,7 +20,7 @@ export async function POST(
       return Response.json({ error: "rate_limited" }, { status: 429 });
     const [{ token }, body] = await Promise.all([
       params,
-      request.json().then((value) => schema.parse(value)),
+      validatedJson(request, schema, 4_096),
     ]);
     const cpf = protectCpf(body.cpf);
     const { data, error } = await adminDb().rpc("accept_quote", {

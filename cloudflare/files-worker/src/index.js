@@ -50,12 +50,30 @@ function corsHeaders(origin) {
   return origin
     ? {
         "Access-Control-Allow-Origin": origin,
-        "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, HEAD, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
         "Access-Control-Max-Age": "86400",
         Vary: "Origin",
       }
     : {};
+}
+function hasMagicBytes(contentType, bytes) {
+  const startsWith = (...values) =>
+    values.every((value, index) => bytes[index] === value);
+  if (contentType === "image/jpeg") return startsWith(0xff, 0xd8, 0xff);
+  if (contentType === "image/png")
+    return startsWith(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+  if (contentType === "image/webp")
+    return (
+      startsWith(0x52, 0x49, 0x46, 0x46) &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    );
+  if (contentType === "application/pdf")
+    return startsWith(0x25, 0x50, 0x44, 0x46, 0x2d);
+  return false;
 }
 const json = (body, status, origin = null) =>
   Response.json(body, {
@@ -95,12 +113,28 @@ export default {
       const length = Number(request.headers.get("content-length") ?? 0);
       if (
         !allowedTypes.has(contentType) ||
-        length <= 0 ||
         length > 15 * 1024 * 1024
       )
         return json({ error: "invalid_file" }, 413, origin);
-      await env.FILES.put(key, request.body, { httpMetadata: { contentType } });
+      const body = await request.arrayBuffer();
+      if (
+        body.byteLength <= 0 ||
+        body.byteLength > 15 * 1024 * 1024 ||
+        !hasMagicBytes(
+          contentType,
+          new Uint8Array(body, 0, Math.min(16, body.byteLength)),
+        )
+      )
+        return json({ error: "invalid_file_content" }, 415, origin);
+      await env.FILES.put(key, body, { httpMetadata: { contentType } });
       return json({ ok: true }, 201, origin);
+    }
+    if (request.method === "HEAD") {
+      const object = await env.FILES.head(key);
+      return new Response(null, {
+        status: object ? 204 : 404,
+        headers: corsHeaders(origin),
+      });
     }
     if (request.method === "GET") {
       const object = await env.FILES.get(key);

@@ -5,87 +5,167 @@ import { FaqList } from "@/components/marketing/faq-list";
 import { PricingGrid } from "@/components/marketing/pricing-grid";
 import { ProductPreview } from "@/components/marketing/product-preview";
 import { MarketingCta } from "@/components/marketing/shell";
+import { appFrame, cn } from "@/lib/utils";
+import { JsonLd } from "@/components/json-ld";
 
 export const metadata: Metadata = {
-  title: "FechaZap — fecha o serviço num link só",
+  title: "FechaZap — do orçamento ao serviço fechado. Em um link.",
   description:
-    "Sua página de serviços em 2 minutos. Cliente vê, pede orçamento, aceita, paga e agenda — tudo pelo seu link.",
+    "Mandou o orçamento. O cliente aceitou. Pagou. Agendou. Tudo pelo mesmo link. Cliente não cria conta.",
+  alternates: { canonical: "/" },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://fechazap.vercel.app/#organization",
+      name: "FechaZap",
+      url: "https://fechazap.vercel.app",
+      logo: "https://fechazap.vercel.app/icon",
+    },
+    {
+      "@type": "WebApplication",
+      name: "FechaZap",
+      url: "https://fechazap.vercel.app",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "Fluxo de fechamento: proposta, aceite, pagamento e agendamento em um único link. O cliente não cria conta.",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "BRL",
+      },
+      publisher: { "@id": "https://fechazap.vercel.app/#organization" },
+    },
+  ],
 };
 
 const STEPS = [
   {
     n: "01",
-    t: "Página",
-    d: "Logo, bio e serviços no seu link. Tipo cardápio digital.",
+    t: "Monte",
+    d: "Serviço, valor, sinal e condições. Vira uma proposta pronta pra enviar.",
   },
   {
     n: "02",
-    t: "Orçamento",
-    d: "Um formulário. Nome, WhatsApp, o quê e quanto.",
+    t: "Envie",
+    d: "Um link no WhatsApp. O cliente abre no celular, sem app e sem conta.",
   },
   {
     n: "03",
-    t: "Aceite",
-    d: "Cliente confirma com nome e CPF. Fica registrado.",
+    t: "Feche",
+    d: "Aceite, pagamento e agendamento no mesmo lugar. Você acompanha cada etapa.",
   },
-  { n: "04", t: "Contrato", d: "Modelo preenchido com o orçamento. Sem Word." },
   {
-    n: "05",
-    t: "PIX",
-    d: "QR e copia-e-cola da sua chave. Você confirma o pagamento.",
+    n: "04",
+    t: "Trabalhe",
+    d: "O serviço está fechado. Você executa. O status não se perde no chat.",
   },
-  { n: "06", t: "Agenda", d: "Você oferece horários. O cliente escolhe um." },
+];
+
+const GRID = [
+  {
+    t: "Proposta",
+    d: "O cliente vê o serviço, o valor e a validade num link limpo.",
+  },
+  {
+    t: "Aceite",
+    d: "Confirma com nome e CPF. Fica registrado — sem contrato no Word.",
+  },
+  {
+    t: "Pagamento",
+    d: "PIX da sua chave, QR e copia-e-cola. Você confirma o sinal.",
+  },
+  {
+    t: "Agenda",
+    d: "Você oferece horários. O cliente escolhe um e pronto.",
+  },
+  {
+    t: "Clientes",
+    d: "Quem fechou, o que pediu e onde parou — sem planilha paralela.",
+  },
+  {
+    t: "Acompanhamento",
+    d: "Cada etapa carimbada. Proposta visualizada, aceitou, sinal pago, agendado.",
+  },
 ];
 
 const NICHES = [
   {
     href: "/beleza",
     title: "Beleza",
-    d: "Manicure, lash, maquiagem, cabelo — preços na bio viram página.",
+    d: "Manicure, lash, maquiagem, cabelo — manda o link e fecha o horário.",
   },
   {
     href: "/reforma",
     title: "Reforma",
-    d: "Pintor, eletricista, encanador — orçamento que não some no WhatsApp.",
+    d: "Pintor, eletricista, encanador — a proposta não some no WhatsApp.",
   },
   {
     href: "/autonomos",
     title: "Autônomos",
-    d: "Qualquer prestador que fecha sozinho e precisa de um link profissional.",
+    d: "Qualquer prestador que fecha sozinho e precisa de um fluxo profissional.",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      <section className="mx-auto max-w-5xl px-4 py-16 md:py-24">
+      <JsonLd data={structuredData} />
+      <section className={cn(appFrame, "py-16 md:py-24")}>
         <p className="font-mono text-sm tracking-widest text-primary uppercase">
           FechaZap
         </p>
         <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-          Sua página de serviços em 2 minutos.
+          Do orçamento ao serviço fechado. Em um link.
         </h1>
-        <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-          Cliente vê, pede orçamento, aceita, paga e agenda — tudo pelo seu
-          link. Sem marketplace. Sem app.
+        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          Mandou o orçamento. O cliente aceitou. Pagou. Agendou. Tudo pelo mesmo
+          link.
+        </p>
+        <p className="mt-2 max-w-xl text-muted-foreground">
+          Orçamento, aceite, pagamento e agendamento em um único link.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="accent" size="lg" className="h-11">
-            <Link href="/cadastro">Criar página grátis</Link>
+            <Link href="/criar-conta">Criar meu primeiro fechamento</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-11">
             <Link href="/preview">Ver preview</Link>
           </Button>
         </div>
+        <p className="mt-4 font-mono text-sm text-muted-foreground">
+          Grátis para começar · Sem cartão
+        </p>
+      </section>
+
+      <section className="border-t">
+        <div className={cn(appFrame, "py-16")}>
+          <h2 className="max-w-2xl text-2xl font-semibold">
+            Fechar um serviço não deveria dar tanto trabalho.
+          </h2>
+          <p className="mt-4 max-w-2xl text-muted-foreground">
+            WhatsApp é ótimo pra conversar. Péssimo pra fechar, cobrar e
+            agendar. O “vou ver e te aviso” vira conversa infinita, comprovante
+            perdido e horário que ninguém confirmou.
+          </p>
+          <p className="mt-4 max-w-2xl text-lg font-medium">
+            Seu cliente disse “vou fechar”? Tire o resto da conversa do
+            WhatsApp.
+          </p>
+        </div>
       </section>
 
       <section id="como-funciona" className="border-t">
-        <div className="mx-auto max-w-5xl px-4 py-16">
+        <div className={cn(appFrame, "py-16")}>
           <h2 className="text-2xl font-semibold">Como funciona</h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Um funil só. O status não se perde no chat.
+            Quatro passos. O status não se perde no chat.
           </p>
-          <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((step) => (
               <li key={step.n} className="rounded-md border bg-card p-4">
                 <p className="font-mono text-xs text-primary">{step.n}</p>
@@ -98,12 +178,12 @@ export default function HomePage() {
       </section>
 
       <section className="border-t bg-muted/30">
-        <div className="mx-auto max-w-5xl px-4 py-16">
+        <div className={cn(appFrame, "py-16")}>
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-semibold">O que o cliente vê</h2>
               <p className="mt-2 text-muted-foreground">
-                Vitrine + recibo. O carimbo confirma cada etapa.
+                A proposta no link. O carimbo confirma cada etapa.
               </p>
             </div>
             <Button asChild variant="outline">
@@ -115,18 +195,35 @@ export default function HomePage() {
       </section>
 
       <section className="border-t">
-        <div className="mx-auto max-w-5xl px-4 py-16">
+        <div className={cn(appFrame, "py-16")}>
+          <h2 className="text-2xl font-semibold">Tudo no mesmo fechamento</h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Sem planilha, sem PDF solto, sem “me manda o PIX de novo”.
+          </p>
+          <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {GRID.map((item) => (
+              <li key={item.t} className="rounded-md border bg-card p-4">
+                <p className="font-medium">{item.t}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{item.d}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="border-t">
+        <div className={cn(appFrame, "py-16")}>
           <h2 className="text-2xl font-semibold">Preços</h2>
           <p className="mt-2 mb-8 text-muted-foreground">
-            Grátis pra começar. Solo pra quem vive disso. Pro existe pra medir
-            interesse.
+            Grátis para começar. Solo pra quem vive disso. Pro pra acompanhar e
+            automatizar.
           </p>
           <PricingGrid />
         </div>
       </section>
 
       <section className="border-t">
-        <div className="mx-auto max-w-5xl px-4 py-16">
+        <div className={cn(appFrame, "py-16")}>
           <h2 className="text-2xl font-semibold">
             Feito pra quem fecha sozinho
           </h2>
@@ -146,7 +243,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-t">
-        <div className="mx-auto max-w-2xl px-4 py-16">
+        <div className={cn(appFrame, "py-16")}>
           <h2 className="text-2xl font-semibold">Perguntas</h2>
           <div className="mt-6">
             <FaqList />
@@ -154,7 +251,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <MarketingCta title="Monta a página. Manda o link. Fecha." />
+      <MarketingCta title='Menos “vou ver e te aviso”. Mais serviço fechado.' />
     </>
   );
 }

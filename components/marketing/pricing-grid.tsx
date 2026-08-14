@@ -5,7 +5,7 @@ import { PLANS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 export function PricingGrid({
-  ctaPrefix = "/cadastro",
+  ctaPrefix = "/criar-conta",
 }: {
   ctaPrefix?: string;
 }) {
@@ -27,7 +27,13 @@ export function PricingGrid({
               "R$ 0"
             ) : (
               <>
-                <span className="font-mono">R$ {plan.price}</span>
+                <span className="font-mono">
+                  R${" "}
+                  {plan.price.toLocaleString("pt-BR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
                 <span className="text-base font-normal text-muted-foreground">
                   /mês
                 </span>

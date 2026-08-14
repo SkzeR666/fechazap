@@ -29,14 +29,14 @@ export default function SettingsPage() {
       <Field label="Nova senha">
         <Input
           type="password"
-          minLength={8}
+          minLength={12}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </Field>
       <Button
         variant="accent"
-        disabled={saving || password.length < 8}
+        disabled={saving || password.length < 12}
         onClick={savePassword}
       >
         {saving ? "Salvando..." : "Atualizar senha"}

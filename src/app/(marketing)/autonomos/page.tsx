@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "FechaZap pra autônomos",
   description:
     "Página profissional e funil de fechamento pra quem trabalha sozinho.",
+  alternates: { canonical: "/autonomos" },
 };
 
 export default function AutonomosPage() {

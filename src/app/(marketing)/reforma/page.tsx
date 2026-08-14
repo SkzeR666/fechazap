@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "FechaZap pra reforma",
   description:
     "Orçamento, contrato, PIX e agenda pra pintor, eletricista e encanador.",
+  alternates: { canonical: "/reforma" },
 };
 
 export default function ReformaPage() {

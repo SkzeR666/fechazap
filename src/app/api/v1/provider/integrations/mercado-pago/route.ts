@@ -1,6 +1,6 @@
 import { adminDb } from "@/src/modules/auth/supabase";
 import { createAuthorization } from "@/src/modules/payments/mercado-pago/connect";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import { apiError, authenticatedDb, rateLimit } from "@/src/server/http";
 
 export async function GET(request: Request) {
   try {
@@ -26,6 +26,8 @@ export async function POST(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    if (!(await rateLimit(request, "oauth-start", 10, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
     return Response.json({ authorizationUrl: await createAuthorization(auth.user.id) });
   } catch (error) {
     return apiError(error);
@@ -36,6 +38,8 @@ export async function DELETE(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    if (!(await rateLimit(request, "oauth-disconnect", 5, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
     const { error } = await adminDb()
       .from("mercado_pago_connections")
       .delete()

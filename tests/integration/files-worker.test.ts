@@ -69,6 +69,10 @@ run("Cloudflare files Worker", () => {
       "https://fechazap.vercel.app",
     );
     try {
+      const head = await fetch(signedUrl("HEAD", key, "", expires), {
+        method: "HEAD",
+      });
+      expect(head.status).toBe(204);
       const get = await fetch(signedUrl("GET", key, "", expires));
       expect(get.status).toBe(200);
       expect(Buffer.from(await get.arrayBuffer())).toEqual(body);
@@ -78,5 +82,24 @@ run("Cloudflare files Worker", () => {
       });
       expect(remove.status).toBe(204);
     }
+  });
+
+  it("rejects a file whose bytes do not match its declared MIME type", async () => {
+    const key = `users/integration/brand/logos/${Date.now()}.png`;
+    const expires = Math.floor(Date.now() / 1000) + 300;
+    const body = Buffer.from("not-a-png");
+    const response = await fetch(
+      signedUrl("PUT", key, "image/png", expires),
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "image/png",
+          "Content-Length": String(body.length),
+          Origin: "https://fechazap.vercel.app",
+        },
+        body,
+      },
+    );
+    expect(response.status).toBe(415);
   });
 });

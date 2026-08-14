@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Money } from "@/components/money";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NarrowPage } from "@/components/narrow-page";
 
 export default function PublicStorefront() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,22 +24,22 @@ export default function PublicStorefront() {
 
   if (isLoading) {
     return (
-      <main className="mx-auto max-w-md px-4 py-10">
+      <NarrowPage>
         <Skeleton className="h-10 w-48" />
         <Skeleton className="mt-6 h-24" />
-      </main>
+      </NarrowPage>
     );
   }
   if (isError || !profile) {
     return (
-      <main className="mx-auto max-w-md px-4 py-16 text-center">
+      <NarrowPage className="text-center">
         <h1 className="text-2xl font-semibold">Página não encontrada</h1>
-      </main>
+      </NarrowPage>
     );
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
+    <NarrowPage>
       <header className="flex items-center gap-3">
         {profile.logoUrl ? (
           <img
@@ -83,6 +84,6 @@ export default function PublicStorefront() {
           Feito com FechaZap
         </p>
       ) : null}
-    </main>
+    </NarrowPage>
   );
 }

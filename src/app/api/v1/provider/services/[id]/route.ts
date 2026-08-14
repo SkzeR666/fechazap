@@ -4,6 +4,7 @@ const schema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   description: z.string().trim().max(1000).nullable().optional(),
   priceCents: z.number().int().nonnegative().nullable().optional(),
+  durationMinutes: z.number().int().positive().max(24 * 60).nullable().optional(),
   active: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
 });
@@ -22,6 +23,7 @@ export async function PATCH(
       name: body.name,
       description: body.description,
       price_cents: body.priceCents,
+      duration_minutes: body.durationMinutes,
       active: body.active,
       sort_order: body.sortOrder,
     };

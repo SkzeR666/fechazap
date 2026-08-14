@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { platformEnv } from "@/src/modules/platform/env";
 import { mpPost, mpPut } from "@/src/modules/payments/mercado-pago/client";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import {
+  apiError,
+  authenticatedDb,
+  rateLimit,
+  validatedJson,
+} from "@/src/server/http";
 const schema = z.object({
   plan: z.enum(["solo", "pro"]),
   payerEmail: z.string().email(),
@@ -26,7 +31,9 @@ export async function POST(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
-    const body = schema.parse(await request.json());
+    if (!(await rateLimit(request, "subscription-create", 5, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
+    const body = await validatedJson(request, schema, 4_096);
     const result = (await mpPost(
       "/preapproval",
       {
@@ -71,6 +78,8 @@ export async function DELETE(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    if (!(await rateLimit(request, "subscription-cancel", 5, 3600)))
+      return Response.json({ error: "rate_limited" }, { status: 429 });
     const { data, error } = await auth.db
       .from("subscriptions")
       .select("provider_reference")

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MarketingCta } from "@/components/marketing/shell";
+import { appFrame } from "@/lib/utils";
 
 type Niche = {
   eyebrow: string;
@@ -12,31 +13,31 @@ type Niche = {
 const NICHES: Record<string, Niche> = {
   beleza: {
     eyebrow: "Beleza",
-    title: "Preço na bio. Orçamento que fecha.",
-    lead: "Manicure, lash, maquiadora, cabeleireiro. O cliente abre o link, vê o serviço e confirma — sem ficar perguntando valor no direct.",
+    title: "Manda o link. A cliente confirma e agenda.",
+    lead: "Manicure, lash, maquiadora, cabeleireiro. Você envia o fechamento. Ela aceita, paga o sinal e escolhe o horário — sem ficar no vai-e-volta do WhatsApp.",
     points: [
-      "Página com serviços e preços opcionais",
-      "Pedido de orçamento pelo próprio link",
-      "PIX e horário no mesmo fluxo",
+      "Proposta com serviço, valor e validade",
+      "Aceite e pagamento no mesmo link",
+      "Agenda sem a cliente criar conta",
     ],
   },
   reforma: {
     eyebrow: "Reforma e manutenção",
-    title: "Orçamento que não some no WhatsApp.",
+    title: "A proposta não some no WhatsApp.",
     lead: "Pintor, eletricista, encanador. Você manda um link. O cliente aceita, paga a entrada e marca o dia.",
     points: [
-      "Formulário único: o quê, quanto, entrada",
-      "Contrato simples preenchido com o orçamento",
-      "Timeline de status por cliente",
+      "Monte o fechamento: o quê, quanto, sinal",
+      "Aceite registrado com nome e CPF",
+      "PIX e horário no mesmo fluxo",
     ],
   },
   autonomos: {
     eyebrow: "Autônomos",
-    title: "Presença profissional sem site caro.",
-    lead: "Você já tem o cliente. Falta um lugar limpo pra mostrar o serviço e um funil que não se perde no chat.",
+    title: "Feche o serviço. Sem site caro.",
+    lead: "Você já tem o cliente. Falta um fluxo limpo pra aceitar, receber e agendar — sem perder o status no chat.",
     points: [
-      "Link único pra bio, cartão e grupo",
-      "Aceite com nome e CPF registrado",
+      "Um link pra mandar no WhatsApp",
+      "Cliente fecha sem criar conta",
       "3 fechamentos grátis por mês",
     ],
   },
@@ -47,7 +48,7 @@ export function NichePage({ slug }: { slug: keyof typeof NICHES }) {
   if (!niche) return null;
   return (
     <>
-      <section className="mx-auto max-w-3xl px-4 py-16">
+      <section className={`${appFrame} py-16`}>
         <p className="font-mono text-sm tracking-widest text-primary uppercase">
           {niche.eyebrow}
         </p>
@@ -60,14 +61,14 @@ export function NichePage({ slug }: { slug: keyof typeof NICHES }) {
         </ul>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="accent" className="h-11">
-            <Link href="/cadastro">Criar página grátis</Link>
+            <Link href="/criar-conta">Começar grátis</Link>
           </Button>
           <Button asChild variant="outline" className="h-11">
             <Link href="/preview">Ver preview</Link>
           </Button>
         </div>
       </section>
-      <MarketingCta title="Mesmo produto. Copy do seu nicho." />
+      <MarketingCta title="Menos “vou ver e te aviso”. Mais serviço fechado." />
     </>
   );
 }

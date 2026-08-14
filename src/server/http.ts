@@ -1,9 +1,28 @@
 import { z } from "zod";
+import { createHash } from "node:crypto";
 import { adminDb, userDb } from "../modules/auth/supabase";
 import { MercadoPagoError } from "../modules/payments/mercado-pago/client";
 
+class RequestBodyError extends Error {
+  constructor(public status: number, public code: string) {
+    super(code);
+  }
+}
+
 export function apiError(error: unknown) {
-  console.error(error);
+  console.error(
+    JSON.stringify({
+      level: "error",
+      message: "api_request_failed",
+      errorType: error instanceof Error ? error.name : "unknown",
+      errorCode:
+        typeof error === "object" && error && "code" in error
+          ? String(error.code).slice(0, 80)
+          : undefined,
+    }),
+  );
+  if (error instanceof RequestBodyError)
+    return Response.json({ error: error.code }, { status: error.status });
   if (error instanceof z.ZodError)
     return Response.json(
       { error: "invalid_request", issues: error.issues },
@@ -26,6 +45,28 @@ export function apiError(error: unknown) {
   return Response.json({ error: "internal_error" }, { status: 500 });
 }
 
+export async function validatedJson<T extends z.ZodTypeAny>(
+  request: Request,
+  schema: T,
+  maxBytes = 32_768,
+): Promise<z.infer<T>> {
+  const contentType = request.headers.get("content-type") ?? "";
+  if (!contentType.toLowerCase().startsWith("application/json"))
+    throw new RequestBodyError(415, "json_required");
+  const declaredLength = Number(request.headers.get("content-length") ?? 0);
+  if (Number.isFinite(declaredLength) && declaredLength > maxBytes)
+    throw new RequestBodyError(413, "payload_too_large");
+  const text = await request.text();
+  if (Buffer.byteLength(text, "utf8") > maxBytes)
+    throw new RequestBodyError(413, "payload_too_large");
+  try {
+    return schema.parse(JSON.parse(text));
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
+    throw new RequestBodyError(400, "invalid_json");
+  }
+}
+
 export async function authenticatedDb(request: Request) {
   const token = request.headers
     .get("authorization")
@@ -46,10 +87,16 @@ export async function rateLimit(
   limit = 10,
   windowSeconds = 60,
 ) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rawIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip")?.trim() ??
+    "unknown";
+  const ipHash = createHash("sha256")
+    .update(rawIp.slice(0, 128))
+    .digest("hex")
+    .slice(0, 24);
   const { data, error } = await adminDb().rpc("consume_rate_limit", {
-    p_key: `${scope}:${ip}`,
+    p_key: `${scope}:${ipHash}`,
     p_limit: limit,
     p_window_seconds: windowSeconds,
   });

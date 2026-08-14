@@ -9,6 +9,7 @@ import { Field } from "@/components/field";
 import { createClient } from "@/lib/supabase/client";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { appFrame } from "@/lib/utils";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -17,8 +18,8 @@ export default function ResetPasswordPage() {
   async function onSubmit(formData: FormData) {
     const password = String(formData.get("password") ?? "");
     const confirm = String(formData.get("confirm") ?? "");
-    if (password.length < 8) {
-      toast.error("A senha precisa ter pelo menos 8 caracteres.");
+    if (password.length < 12) {
+      toast.error("A senha precisa ter pelo menos 12 caracteres.");
       return;
     }
     if (password !== confirm) {
@@ -40,7 +41,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
+      <main className={`${appFrame} flex flex-1 flex-col justify-center py-16`}>
+        <div className="mx-auto w-full max-w-md">
         <h1 className="text-3xl font-semibold">Nova senha</h1>
         <form action={onSubmit} className="mt-8 grid gap-4">
           <Field label="Nova senha" htmlFor="password">
@@ -49,7 +51,7 @@ export default function ResetPasswordPage() {
               name="password"
               type="password"
               required
-              minLength={8}
+              minLength={12}
               autoComplete="new-password"
             />
           </Field>
@@ -59,7 +61,7 @@ export default function ResetPasswordPage() {
               name="confirm"
               type="password"
               required
-              minLength={8}
+              minLength={12}
               autoComplete="new-password"
             />
           </Field>
@@ -72,6 +74,7 @@ export default function ResetPasswordPage() {
             {pending ? "Salvando..." : "Salvar senha"}
           </Button>
         </form>
+        </div>
       </main>
       <SiteFooter />
     </div>

@@ -111,6 +111,7 @@ export type ServiceRow = {
   name: string;
   description: string | null;
   price_cents: number | null;
+  duration_minutes: number | null;
   active: boolean;
   sort_order: number;
   created_at: string;
@@ -121,8 +122,26 @@ export type ServiceInput = {
   name: string;
   description?: string;
   priceCents?: number | null;
+  durationMinutes?: number | null;
   active?: boolean;
   sortOrder?: number;
+};
+
+export type AvailabilityRuleRow = {
+  id: string;
+  user_id: string;
+  weekday: number;
+  start_time: string | null;
+  end_time: string | null;
+  enabled: boolean;
+};
+
+export type AvailabilityExceptionRow = {
+  id: string;
+  user_id: string;
+  starts_at: string;
+  ends_at: string;
+  reason: string | null;
 };
 
 export type CustomerRow = {

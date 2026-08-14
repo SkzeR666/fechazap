@@ -24,8 +24,16 @@ export function publicStorefrontUrl(slug: string, origin = appOrigin()) {
   return `${origin.replace(/\/$/, "")}/${slug}`;
 }
 
-export function publicQuoteUrl(slug: string, token: string, origin = appOrigin()) {
-  return `${publicStorefrontUrl(slug, origin)}/o/${token}`;
+export function publicClosingUrl(token: string, origin = appOrigin()) {
+  return `${origin.replace(/\/$/, "")}/f/${token}`;
+}
+
+export function publicQuoteUrl(
+  _slug: string,
+  token: string,
+  origin = appOrigin(),
+) {
+  return publicClosingUrl(token, origin);
 }
 
 export function logoUrl(slug: string) {

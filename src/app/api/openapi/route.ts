@@ -53,6 +53,7 @@ export function GET() {
         post: operation("Criar cliente", true, "201"),
       },
       "/v1/provider/customers/{id}": {
+        get: operation("Consultar cliente", true),
         delete: operation("Excluir cliente", true),
       },
       "/v1/provider/services": {
@@ -113,6 +114,14 @@ export function GET() {
       },
       "/v1/provider/reminders/{id}/delivered": {
         post: operation("Marcar lembrete entregue", true),
+      },
+      "/v1/provider/availability/rules": {
+        get: operation("Listar horários da agenda", true),
+        put: operation("Salvar horários da agenda", true),
+      },
+      "/v1/provider/availability/exceptions": {
+        get: operation("Listar bloqueios de horário", true),
+        post: operation("Criar bloqueio de horário", true, "201"),
       },
       "/webhooks/mercado-pago": {
         post: operation("Receber evento assinado do Mercado Pago"),

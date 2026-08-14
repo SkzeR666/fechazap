@@ -1,7 +1,7 @@
 import { createHmac } from "node:crypto";
 import { filesEnv } from "../platform/env";
 
-type Method = "PUT" | "GET" | "DELETE";
+type Method = "PUT" | "GET" | "HEAD" | "DELETE";
 
 function signedUrl(
   method: Method,
@@ -28,6 +28,16 @@ export function createUploadUrl(key: string, contentType: string) {
 
 export function createDownloadUrl(key: string) {
   return signedUrl("GET", key, "", 300).toString();
+}
+
+export async function fileExists(key: string) {
+  const response = await fetch(signedUrl("HEAD", key, "", 60), {
+    method: "HEAD",
+    cache: "no-store",
+  });
+  if (response.status === 404) return false;
+  if (!response.ok) throw new Error(`files_worker_head_${response.status}`);
+  return true;
 }
 
 export async function uploadFile(

@@ -9,6 +9,7 @@ import { Field } from "@/components/field";
 import { createClient } from "@/lib/supabase/client";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { appFrame } from "@/lib/utils";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
@@ -37,7 +38,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
+      <main className={`${appFrame} flex flex-1 flex-col justify-center py-16`}>
+        <div className="mx-auto w-full max-w-md">
         <h1 className="text-3xl font-semibold">Esqueci a senha</h1>
         {sent ? (
           <p className="mt-4 text-muted-foreground">
@@ -69,6 +71,7 @@ export default function ForgotPasswordPage() {
             Voltar ao login
           </Link>
         </p>
+        </div>
       </main>
       <SiteFooter />
     </div>

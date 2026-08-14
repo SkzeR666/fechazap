@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { appFrame } from "@/lib/utils";
 
 export function SiteFooter() {
   return (
     <footer className="border-t">
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 py-10 md:grid-cols-[1fr_auto_auto]">
+      <div className={`${appFrame} grid gap-8 py-10 md:grid-cols-[1fr_auto_auto]`}>
         <div>
           <p className="font-heading text-lg font-semibold">FechaZap</p>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -31,14 +32,14 @@ export function SiteFooter() {
         </div>
         <div className="grid gap-2 text-sm">
           <p className="font-medium">Conta</p>
-          <Link href="/login" className="text-muted-foreground hover:text-foreground">
+          <Link href="/entrar" className="text-muted-foreground hover:text-foreground">
             Entrar
           </Link>
-          <Link href="/cadastro" className="text-muted-foreground hover:text-foreground">
+          <Link href="/criar-conta" className="text-muted-foreground hover:text-foreground">
             Criar conta
           </Link>
-          <Link href="/esqueci-senha" className="text-muted-foreground hover:text-foreground">
-            Esqueci a senha
+          <Link href="/recuperar-senha" className="text-muted-foreground hover:text-foreground">
+            Recuperar senha
           </Link>
           <Link href="/termos" className="text-muted-foreground hover:text-foreground">
             Termos

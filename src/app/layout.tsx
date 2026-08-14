@@ -22,8 +22,41 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FechaZap",
-  description: "Orçamento, contrato, PIX e agenda — num link só.",
+  metadataBase: new URL("https://fechazap.vercel.app"),
+  title: {
+    default: "FechaZap — do orçamento ao serviço fechado. Em um link.",
+    template: "%s | FechaZap",
+  },
+  description:
+    "Envie a proposta, receba o aceite, confirme o pagamento e organize o agendamento. O cliente resolve tudo no link, sem criar conta.",
+  applicationName: "FechaZap",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    siteName: "FechaZap",
+    url: "/",
+    title: "FechaZap — do orçamento ao serviço fechado. Em um link.",
+    description:
+      "Mandou o orçamento. O cliente aceitou. Pagou. Agendou. Tudo pelo mesmo link.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FechaZap — do orçamento ao serviço fechado. Em um link.",
+    description:
+      "Mandou o orçamento. O cliente aceitou. Pagou. Agendou. Tudo pelo mesmo link.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  category: "business",
 };
 
 export default function RootLayout({
@@ -34,6 +67,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      suppressHydrationWarning
       className={cn(
         montserrat.variable,
         geistMono.variable,
