@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/field";
 import { createClient } from "@/lib/supabase/client";
+import { SiteHeader } from "@/components/marketing/site-header";
+import { SiteFooter } from "@/components/marketing/site-footer";
 
 const schema = z.object({
   email: z.string().email(),
@@ -51,7 +53,9 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-16">
       <p className="font-mono text-sm tracking-widest text-primary uppercase">
         FechaZap
       </p>
@@ -77,6 +81,13 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
           {pending ? "Aguarde..." : mode === "login" ? "Entrar" : "Cadastrar"}
         </Button>
       </form>
+      {mode === "login" ? (
+        <p className="mt-3 text-sm">
+          <Link href="/esqueci-senha" className="text-primary underline">
+            Esqueci a senha
+          </Link>
+        </p>
+      ) : null}
       <p className="mt-6 text-sm text-muted-foreground">
         {mode === "login" ? (
           <>
@@ -91,9 +102,20 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
             <Link href="/login" className="text-primary underline">
               Entrar
             </Link>
+            . Ao criar a conta você aceita os{" "}
+            <Link href="/termos" className="underline">
+              termos
+            </Link>{" "}
+            e a{" "}
+            <Link href="/privacidade" className="underline">
+              privacidade
+            </Link>
+            .
           </>
         )}
       </p>
-    </main>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

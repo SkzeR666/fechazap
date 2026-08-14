@@ -46,6 +46,12 @@ npm run build
 
 `.env.local` é ignorado pelo Git. A lista canônica de variáveis fica em `.env.example`.
 
+## Páginas
+
+- `/` landing · `/preview` · `/precos` · `/beleza` · `/reforma` · `/autonomos`
+- `/login` · `/cadastro` · `/esqueci-senha` · `/redefinir-senha`
+- `/dashboard` e o funil público `fechazap.com/{slug}` e `fechazap.com/{slug}/o/{token}` (não há subdomínio `slug.fechazap.com`)
+
 ## Rotas principais
 
 | Método               | Rota                                                | Acesso                     |
@@ -53,7 +59,8 @@ npm run build
 | GET                  | `/api/health`                                       | público                    |
 | GET                  | `/api/openapi`                                      | público                    |
 | GET/PUT              | `/api/v1/provider/profile`                          | Supabase JWT               |
-| GET                  | `/api/v1/provider/customers`                        | Supabase JWT               |
+| GET/POST             | `/api/v1/provider/customers`                        | Supabase JWT               |
+| DELETE               | `/api/v1/provider/customers/:id`                    | Supabase JWT               |
 | GET/POST             | `/api/v1/provider/services`                         | Supabase JWT               |
 | PATCH/DELETE         | `/api/v1/provider/services/:id`                     | Supabase JWT               |
 | GET/POST             | `/api/v1/provider/quotes`                           | Supabase JWT               |

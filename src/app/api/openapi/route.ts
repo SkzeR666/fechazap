@@ -50,6 +50,10 @@ export function GET() {
       },
       "/v1/provider/customers": {
         get: operation("Listar clientes", true),
+        post: operation("Criar cliente", true, "201"),
+      },
+      "/v1/provider/customers/{id}": {
+        delete: operation("Excluir cliente", true),
       },
       "/v1/provider/services": {
         get: operation("Listar serviços", true),

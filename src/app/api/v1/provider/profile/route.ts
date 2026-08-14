@@ -1,8 +1,12 @@
 import { z } from "zod";
 import { apiError, authenticatedDb } from "@/src/server/http";
+import { RESERVED_SLUGS } from "@/lib/slugs";
 
 const schema = z.object({
-  slug: z.string().regex(/^[a-z0-9][a-z0-9-]{2,47}$/),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9-]{2,47}$/)
+    .refine((value) => !RESERVED_SLUGS.has(value), "slug_reserved"),
   businessName: z.string().trim().min(2).max(120),
   bio: z.string().trim().max(500).optional(),
   logoUrl: z.string().url().optional(),

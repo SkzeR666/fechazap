@@ -5,6 +5,11 @@ export const BRAND_COLORS = [
   { hex: "#4A3B6B", name: "Uva" },
 ] as const;
 
+function appOrigin() {
+  if (typeof window !== "undefined") return window.location.origin;
+  return process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "";
+}
+
 export function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -15,12 +20,12 @@ export function slugify(value: string) {
     .slice(0, 48);
 }
 
-export function publicQuoteUrl(slug: string, token: string) {
-  const origin =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : (process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "");
-  return `${origin}/${slug}/o/${token}`;
+export function publicStorefrontUrl(slug: string, origin = appOrigin()) {
+  return `${origin.replace(/\/$/, "")}/${slug}`;
+}
+
+export function publicQuoteUrl(slug: string, token: string, origin = appOrigin()) {
+  return `${publicStorefrontUrl(slug, origin)}/o/${token}`;
 }
 
 export function logoUrl(slug: string) {
@@ -33,7 +38,10 @@ export function one<T>(value: T | T[] | null | undefined): T | null {
 }
 
 export function reaisToCents(value: string) {
-  const normalized = value.replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+  const normalized = value
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
   const amount = Number(normalized);
   if (!Number.isFinite(amount) || amount < 0) return null;
   return Math.round(amount * 100);

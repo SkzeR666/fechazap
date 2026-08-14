@@ -88,6 +88,11 @@ export default function BrandPage() {
       <Field label="Slug">
         <Input value={slug} onChange={(e) => setSlug(e.target.value)} />
       </Field>
+      {slug ? (
+        <p className="font-mono text-xs text-muted-foreground">
+          fechazap.com/{slug}
+        </p>
+      ) : null}
       <Field label="Bio">
         <Textarea
           value={bio}

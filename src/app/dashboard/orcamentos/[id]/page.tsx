@@ -55,20 +55,6 @@ export default function QuoteDetailPage() {
             {link}
           </p>
         ) : null}
-        {link && customer?.phone && quote.status !== "requested" ? (
-          <Button asChild variant="accent" className="mt-4">
-            <a
-              href={whatsappUrl(
-                customer.phone,
-                `Olá, ${customer.name}! Seu orçamento está pronto: ${link}`,
-              )}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Enviar pelo WhatsApp
-            </a>
-          </Button>
-        ) : null}
       </div>
 
       {quote.status === "requested" ? (

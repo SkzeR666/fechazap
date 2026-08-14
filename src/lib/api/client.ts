@@ -103,6 +103,20 @@ export const api = {
       }),
     customers: (token: string) =>
       request<{ data: CustomerRow[] }>("/api/v1/provider/customers", { token }),
+    createCustomer: (
+      token: string,
+      body: { name: string; phone: string; email?: string },
+    ) =>
+      request<CustomerRow>("/api/v1/provider/customers", {
+        method: "POST",
+        token,
+        body,
+      }),
+    deleteCustomer: (token: string, id: string) =>
+      request<void>(`/api/v1/provider/customers/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        token,
+      }),
     services: (token: string) =>
       request<{ data: ServiceRow[] }>("/api/v1/provider/services", { token }),
     createService: (token: string, body: ServiceInput) =>
@@ -183,6 +197,24 @@ export const api = {
         "/api/v1/provider/subscription",
         { token },
       ),
+    subscribe: (
+      token: string,
+      body: { plan: "solo" | "pro"; payerEmail: string },
+    ) =>
+      request<{
+        subscriptionId: string;
+        status: string;
+        checkoutUrl: string;
+      }>("/api/v1/provider/subscription", {
+        method: "POST",
+        token,
+        body,
+      }),
+    cancelSubscription: (token: string) =>
+      request<{ status: string }>("/api/v1/provider/subscription", {
+        method: "DELETE",
+        token,
+      }),
   },
 };
 

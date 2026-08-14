@@ -41,11 +41,6 @@ export default function SettingsPage() {
       >
         {saving ? "Salvando..." : "Atualizar senha"}
       </Button>
-      <p className="text-sm text-muted-foreground">
-        Notificações por WhatsApp são enviadas pelo cron do backend quando o
-        orçamento está para expirar, o PIX está pendente ou o horário se
-        aproxima.
-      </p>
     </div>
   );
 }

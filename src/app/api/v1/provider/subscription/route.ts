@@ -39,7 +39,7 @@ export async function POST(request: Request) {
           transaction_amount: prices[body.plan],
           currency_id: "BRL",
         },
-        back_url: `${platformEnv().APP_URL}/settings/billing`,
+        back_url: `${platformEnv().APP_URL}/dashboard/assinatura`,
         notification_url: `${platformEnv().APP_URL}/api/webhooks/mercado-pago`,
         status: "pending",
       },
