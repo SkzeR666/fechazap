@@ -13,9 +13,11 @@ import { Money, Timestamp } from "@/components/money";
 import { Carimbo } from "@/components/carimbo";
 import { STATUS_LABEL, isStamped, stampLabel } from "@/lib/status";
 import { one, publicQuoteUrl } from "@/lib/format";
+import { reaisToCents } from "@/lib/format";
 import { useProfile } from "@/hooks/use-profile";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { QuoteStatus } from "@/src/domain/quote-state";
+import { whatsappUrl } from "@/src/lib/whatsapp";
 
 export default function QuoteDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,7 +55,32 @@ export default function QuoteDetailPage() {
             {link}
           </p>
         ) : null}
+        {link && customer?.phone && quote.status !== "requested" ? (
+          <Button asChild variant="accent" className="mt-4">
+            <a
+              href={whatsappUrl(
+                customer.phone,
+                `Olá, ${customer.name}! Seu orçamento está pronto: ${link}`,
+              )}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Enviar pelo WhatsApp
+            </a>
+          </Button>
+        ) : null}
       </div>
+
+      {quote.status === "requested" ? (
+        <RequestResponse
+          quoteId={id}
+          token={token}
+          initialTitle={quote.title ?? quote.message ?? "Orçamento solicitado"}
+          customerName={customer?.name ?? "cliente"}
+          customerPhone={customer?.phone ?? ""}
+          publicLink={link}
+        />
+      ) : null}
 
       <section>
         <h2 className="mb-4 text-sm font-medium text-muted-foreground">
@@ -131,6 +158,111 @@ export default function QuoteDetailPage() {
         </Button>
       ) : null}
     </div>
+  );
+}
+
+function RequestResponse({
+  quoteId,
+  token,
+  initialTitle,
+  customerName,
+  customerPhone,
+  publicLink,
+}: {
+  quoteId: string;
+  token: string | null;
+  initialTitle: string;
+  customerName: string;
+  customerPhone: string;
+  publicLink: string | null;
+}) {
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState(initialTitle);
+  const [amount, setAmount] = useState("");
+  const [sent, setSent] = useState(false);
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!token) throw new Error("missing_token");
+      const amountCents = reaisToCents(amount);
+      if (!amountCents || amountCents <= 0) throw new Error("invalid_amount");
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      await api.provider.replaceItems(token, quoteId, {
+        title,
+        expiresAt: expiresAt.toISOString(),
+        items: [
+          {
+            description: title,
+            quantity: 1,
+            unitPriceCents: amountCents,
+            sortOrder: 0,
+          },
+        ],
+      });
+      await api.provider.transition(token, quoteId, "sent");
+    },
+    onSuccess: async () => {
+      setSent(true);
+      await queryClient.invalidateQueries({ queryKey: ["quote", quoteId] });
+      await queryClient.invalidateQueries({ queryKey: ["quotes"] });
+      toast.success("Orçamento enviado e pronto para compartilhar.");
+    },
+    onError: () => toast.error("Revise o título e informe um valor válido."),
+  });
+
+  if (sent && publicLink) {
+    return (
+      <Card className="grid max-w-lg gap-3 p-5">
+        <h2 className="font-medium">Orçamento pronto</h2>
+        <p className="break-all font-mono text-xs text-muted-foreground">
+          {publicLink}
+        </p>
+        <Button asChild variant="accent">
+          <a
+            href={whatsappUrl(
+              customerPhone,
+              `Olá, ${customerName}! Seu orçamento está pronto: ${publicLink}`,
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Responder pelo WhatsApp
+          </a>
+        </Button>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="grid max-w-lg gap-4 p-5">
+      <div>
+        <h2 className="font-medium">Responder pedido</h2>
+        <p className="text-sm text-muted-foreground">
+          Monte o orçamento sem criar outro cliente ou pedido.
+        </p>
+      </div>
+      <Input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder="Serviço ou proposta"
+      />
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-sm">R$</span>
+        <Input
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          inputMode="decimal"
+          placeholder="0,00"
+        />
+      </div>
+      <Button
+        variant="accent"
+        disabled={mutation.isPending}
+        onClick={() => mutation.mutate()}
+      >
+        {mutation.isPending ? "Enviando..." : "Montar e enviar orçamento"}
+      </Button>
+    </Card>
   );
 }
 

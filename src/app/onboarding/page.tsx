@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 const profileSchema = z.object({
   businessName: z.string().trim().min(2).max(120),
   slug: z.string().regex(/^[a-z0-9][a-z0-9-]{2,47}$/),
+  whatsapp: z.string().trim().min(8).max(30),
+  pixKey: z.string().trim().min(3).max(180),
 });
 
 const serviceSchema = z.object({
@@ -38,7 +40,7 @@ export default function OnboardingPage() {
 
   const profileForm = useForm({
     resolver: zodResolver(profileSchema),
-    defaultValues: { businessName: "", slug: "" },
+    defaultValues: { businessName: "", slug: "", whatsapp: "", pixKey: "" },
   });
   const serviceForm = useForm({
     resolver: zodResolver(serviceSchema),
@@ -75,6 +77,8 @@ export default function OnboardingPage() {
         businessName: values.businessName,
         brandColor,
         logoUrl: uploadedLogo,
+        whatsapp: values.whatsapp,
+        pixKey: values.pixKey,
       });
       setSlug(values.slug);
       setStep(3);
@@ -157,6 +161,29 @@ export default function OnboardingPage() {
               </span>
               <Input id="slug" {...profileForm.register("slug")} />
             </div>
+          </Field>
+          <Field
+            label="WhatsApp comercial"
+            htmlFor="whatsapp"
+            error={profileForm.formState.errors.whatsapp?.message}
+          >
+            <Input
+              id="whatsapp"
+              inputMode="tel"
+              placeholder="5511999999999"
+              {...profileForm.register("whatsapp")}
+            />
+          </Field>
+          <Field
+            label="Chave PIX para receber"
+            htmlFor="pixKey"
+            error={profileForm.formState.errors.pixKey?.message}
+          >
+            <Input
+              id="pixKey"
+              placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+              {...profileForm.register("pixKey")}
+            />
           </Field>
           <Button type="submit" variant="accent" className="h-11">
             Continuar
