@@ -7,7 +7,7 @@ const AUTH_PAGES = ["/login", "/cadastro"];
 export async function proxy(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) return NextResponse.next({ request });
+  if (!url || !key) throw new Error("missing_supabase_public_env");
 
   let supabaseResponse = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {
