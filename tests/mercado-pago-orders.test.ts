@@ -33,6 +33,7 @@ describe("Mercado Pago Orders PIX", () => {
     );
 
     const result = await createPixOrder({
+      accessToken: "APP_USR-connected-seller",
       quoteId: "quote-1",
       amountCents: 12345,
       email: "client@example.com",
@@ -42,6 +43,9 @@ describe("Mercado Pago Orders PIX", () => {
 
     expect(url).toBe("https://api.mercadopago.com/v1/orders");
     expect(init?.method).toBe("POST");
+    expect((init?.headers as Record<string, string>).Authorization).toBe(
+      "Bearer APP_USR-connected-seller",
+    );
     expect(
       (init?.headers as Record<string, string>)["X-Idempotency-Key"],
     ).toBeTruthy();

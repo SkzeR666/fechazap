@@ -76,6 +76,8 @@ export type PublicQuote = {
     status: string;
     provider: string;
     paidAt: string | null;
+    pixCode: string | null;
+    ticketUrl: string | null;
   } | null;
 };
 
@@ -247,7 +249,12 @@ export type SubscriptionRow = {
 };
 
 export type UploadUrlResult = {
-  document: { id: string; object_key: string; kind: string };
+  upload: {
+    objectKey: string;
+    kind: "logo" | "image" | "attachment" | "quote_pdf";
+    quoteId?: string;
+    contentType: "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
+  };
   uploadUrl: string;
   expiresIn: number;
 };

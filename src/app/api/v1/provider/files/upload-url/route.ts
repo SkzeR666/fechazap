@@ -50,21 +50,14 @@ export async function POST(request: Request) {
       category: body.kind as FileCategory,
       extension,
     });
-    const { data, error } = await auth.db
-      .from("documents")
-      .insert({
-        user_id: auth.user.id,
-        quote_id: body.quoteId,
-        kind: databaseKind[body.kind],
-        object_key: key,
-        content_type: body.contentType,
-      })
-      .select()
-      .single();
-    if (error) throw error;
     return Response.json(
       {
-        document: data,
+        upload: {
+          objectKey: key,
+          kind: databaseKind[body.kind],
+          quoteId: body.quoteId,
+          contentType: body.contentType,
+        },
         uploadUrl: createUploadUrl(key, body.contentType),
         expiresIn: 600,
       },

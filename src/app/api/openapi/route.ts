@@ -91,6 +91,9 @@ export function GET() {
       "/v1/provider/files/upload-url": {
         post: operation("Criar URL de upload R2", true, "201"),
       },
+      "/v1/provider/files/confirm": {
+        post: operation("Confirmar upload concluído no R2", true, "201"),
+      },
       "/v1/provider/files/{id}": {
         get: operation("Criar URL de download R2", true),
         delete: operation("Excluir arquivo do R2", true),
@@ -99,6 +102,14 @@ export function GET() {
         get: operation("Consultar assinatura", true),
         post: operation("Assinar plano FechaZap", true, "201"),
         delete: operation("Cancelar assinatura", true),
+      },
+      "/v1/provider/integrations/mercado-pago": {
+        get: operation("Consultar conexão Mercado Pago", true),
+        post: operation("Iniciar OAuth Mercado Pago com PKCE", true),
+        delete: operation("Desconectar Mercado Pago", true),
+      },
+      "/v1/provider/integrations/mercado-pago/callback": {
+        get: operation("Concluir OAuth Mercado Pago"),
       },
       "/v1/provider/reminders/{id}/delivered": {
         post: operation("Marcar lembrete entregue", true),

@@ -22,6 +22,10 @@ const mercadoPagoSchema = z.object({
   MERCADO_PAGO_APP_ID: z.string().regex(/^\d+$/),
 });
 
+const mercadoPagoOAuthSchema = mercadoPagoSchema.extend({
+  MERCADO_PAGO_CLIENT_SECRET: z.string().min(16),
+});
+
 const mercadoPagoWebhookSchema = mercadoPagoSchema.extend({
   MERCADO_PAGO_WEBHOOK_SECRET: z.string().min(16),
 });
@@ -30,5 +34,7 @@ export const platformEnv = () => platformSchema.parse(process.env);
 export const supabaseEnv = () => supabaseSchema.parse(process.env);
 export const filesEnv = () => filesSchema.parse(process.env);
 export const mercadoPagoEnv = () => mercadoPagoSchema.parse(process.env);
+export const mercadoPagoOAuthEnv = () =>
+  mercadoPagoOAuthSchema.parse(process.env);
 export const mercadoPagoWebhookEnv = () =>
   mercadoPagoWebhookSchema.parse(process.env);

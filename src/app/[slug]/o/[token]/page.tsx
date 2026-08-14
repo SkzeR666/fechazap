@@ -237,7 +237,8 @@ function ContractPanel({
 }
 
 function PixPanel({ quote }: { quote: PublicQuote }) {
-  const pix = quote.provider.pixKey;
+  const automaticPix = quote.payment?.pixCode;
+  const pix = automaticPix ?? quote.provider.pixKey;
   const [waiting, setWaiting] = useState(false);
   if (!pix) {
     return (
@@ -249,6 +250,9 @@ function PixPanel({ quote }: { quote: PublicQuote }) {
   return (
     <div className="mt-6 grid justify-items-center gap-4">
       <QRCodeSVG value={pix} size={180} />
+      <p className="font-mono text-xs uppercase text-primary">
+        {automaticPix ? "PIX Mercado Pago" : "PIX manual"}
+      </p>
       <p className="break-all font-mono text-sm">{pix}</p>
       <Button
         variant="outline"
@@ -259,6 +263,13 @@ function PixPanel({ quote }: { quote: PublicQuote }) {
       >
         Copiar chave PIX
       </Button>
+      {quote.payment?.ticketUrl ? (
+        <Button asChild variant="outline">
+          <a href={quote.payment.ticketUrl} target="_blank" rel="noreferrer">
+            Abrir página do PIX
+          </a>
+        </Button>
+      ) : null}
       <Button
         variant="accent"
         className="h-11 w-full"

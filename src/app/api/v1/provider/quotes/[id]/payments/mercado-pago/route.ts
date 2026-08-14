@@ -1,4 +1,5 @@
 import { createPixOrder } from "@/src/modules/payments/mercado-pago/orders";
+import { sellerAccessToken } from "@/src/modules/payments/mercado-pago/connect";
 import { apiError, authenticatedDb } from "@/src/server/http";
 
 export async function POST(
@@ -25,8 +26,28 @@ export async function POST(
         { error: "customer_email_required" },
         { status: 422 },
       );
+    const { data: existing, error: existingError } = await auth.db
+      .from("payments")
+      .select("id")
+      .eq("quote_id", quote.id)
+      .eq("provider", "mercado_pago")
+      .eq("status", "pending")
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existing)
+      return Response.json(
+        { error: "payment_already_pending" },
+        { status: 409 },
+      );
 
+    const accessToken = await sellerAccessToken(auth.user.id);
+    if (!accessToken)
+      return Response.json(
+        { error: "mercado_pago_not_connected" },
+        { status: 409 },
+      );
     const order = await createPixOrder({
+      accessToken,
       quoteId: quote.id,
       amountCents: quote.total_cents,
       email: customer.email,
@@ -40,6 +61,8 @@ export async function POST(
         external_reference: quote.id,
         amount_cents: quote.total_cents,
         raw_status: `${order.status}:${order.statusDetail}`,
+        pix_code: order.pix?.qrCode,
+        ticket_url: order.pix?.ticketUrl,
       },
       { onConflict: "provider,provider_reference" },
     );

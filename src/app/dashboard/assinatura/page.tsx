@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { api } from "@/src/lib/api/client";
+import { api, ApiError } from "@/src/lib/api/client";
 import { useAccessToken } from "@/hooks/use-access-token";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { PLANS } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 export default function SubscriptionPage() {
-  const { token, ready } = useAccessToken();
+  const { token, email: accountEmail, ready } = useAccessToken();
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState<"solo" | "pro" | "cancel" | null>(
     null,
@@ -30,6 +30,10 @@ export default function SubscriptionPage() {
     queryFn: () => api.provider.subscription(token!),
     enabled: ready && Boolean(token),
   });
+
+  useEffect(() => {
+    if (accountEmail) setEmail((current) => current || accountEmail);
+  }, [accountEmail]);
 
   if (!ready || profile.isLoading || subscription.isLoading) {
     return <Skeleton className="h-40" />;
@@ -51,8 +55,12 @@ export default function SubscriptionPage() {
         payerEmail: email,
       });
       window.location.href = result.checkoutUrl;
-    } catch {
-      toast.error("Não foi possível abrir o checkout.");
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError && error.body.detail
+          ? error.body.detail
+          : "Não foi possível abrir o checkout.",
+      );
       setPending(null);
     }
   }
@@ -93,6 +101,10 @@ export default function SubscriptionPage() {
           placeholder="voce@email.com"
         />
       </Field>
+      <p className="-mt-4 text-xs text-muted-foreground">
+        Para testar uma compra, use uma conta Mercado Pago diferente da conta
+        vendedora.
+      </p>
       <div className="grid gap-4 md:grid-cols-3">
         {PLANS.map((item) => (
           <Card

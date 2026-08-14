@@ -70,6 +70,7 @@ export default function OnboardingPage() {
           body: logoFile,
         });
         if (!put.ok) throw new Error("upload_failed");
+        await api.provider.confirmUpload(token, upload.upload);
         uploadedLogo = `${window.location.origin}${logoUrl(values.slug)}`;
       }
       await api.provider.saveProfile(token, {

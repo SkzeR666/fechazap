@@ -177,6 +177,31 @@ export const api = {
         `/api/v1/provider/quotes/${encodeURIComponent(id)}/payments/manual`,
         { method: "POST", token },
       ),
+    createMercadoPagoPix: (token: string, id: string) =>
+      request<{
+        paymentId: string;
+        status: string;
+        pix?: { qrCode?: string; ticketUrl?: string };
+      }>(
+        `/api/v1/provider/quotes/${encodeURIComponent(id)}/payments/mercado-pago`,
+        { method: "POST", token },
+      ),
+    mercadoPagoConnection: (token: string) =>
+      request<{
+        connected: boolean;
+        accountId: string | null;
+        connectedAt: string | null;
+      }>("/api/v1/provider/integrations/mercado-pago", { token }),
+    connectMercadoPago: (token: string) =>
+      request<{ authorizationUrl: string }>(
+        "/api/v1/provider/integrations/mercado-pago",
+        { method: "POST", token },
+      ),
+    disconnectMercadoPago: (token: string) =>
+      request<void>("/api/v1/provider/integrations/mercado-pago", {
+        method: "DELETE",
+        token,
+      }),
     uploadUrl: (
       token: string,
       body: {
@@ -192,6 +217,11 @@ export const api = {
         token,
         body,
       }),
+    confirmUpload: (token: string, body: UploadUrlResult["upload"]) =>
+      request<{ document: { id: string; object_key: string; kind: string } }>(
+        "/api/v1/provider/files/confirm",
+        { method: "POST", token, body },
+      ),
     subscription: (token: string) =>
       request<{ data: SubscriptionRow | null }>(
         "/api/v1/provider/subscription",

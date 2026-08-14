@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Space_Grotesk } from "next/font/google";
+import { Geist_Mono, IBM_Plex_Mono, Montserrat } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-montserrat",
 });
 
-const spaceGrotesk = Space_Grotesk({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-space",
+  variable: "--font-geist-mono",
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -35,8 +35,8 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={cn(
-        inter.variable,
-        spaceGrotesk.variable,
+        montserrat.variable,
+        geistMono.variable,
         ibmPlexMono.variable,
         "font-sans",
       )}

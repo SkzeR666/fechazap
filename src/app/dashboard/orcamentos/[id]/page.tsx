@@ -103,21 +103,40 @@ export default function QuoteDetailPage() {
       </section>
 
       {quote.status === "awaiting_payment" ? (
-        <Button
-          variant="accent"
-          onClick={async () => {
-            if (!token) return;
-            try {
-              await api.provider.confirmManualPayment(token, id);
-              await queryClient.invalidateQueries({ queryKey: ["quote", id] });
-              toast.success("Pagamento confirmado.");
-            } catch {
-              toast.error("Não foi possível confirmar o PIX.");
-            }
-          }}
-        >
-          Confirmar PIX recebido
-        </Button>
+        <div className="grid max-w-md gap-3 sm:grid-cols-2">
+          <Button
+            variant="accent"
+            onClick={async () => {
+              if (!token) return;
+              try {
+                await api.provider.createMercadoPagoPix(token, id);
+                await queryClient.invalidateQueries({ queryKey: ["quote", id] });
+                toast.success("PIX automático criado e exibido ao cliente.");
+              } catch {
+                toast.error(
+                  "Não foi possível gerar. Conecte o Mercado Pago em Integrações e confira o e-mail do cliente.",
+                );
+              }
+            }}
+          >
+            Gerar PIX automático
+          </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              if (!token) return;
+              try {
+                await api.provider.confirmManualPayment(token, id);
+                await queryClient.invalidateQueries({ queryKey: ["quote", id] });
+                toast.success("Pagamento confirmado.");
+              } catch {
+                toast.error("Não foi possível confirmar o PIX.");
+              }
+            }}
+          >
+            Confirmar PIX manual
+          </Button>
+        </div>
       ) : null}
 
       {quote.status === "paid" ? (

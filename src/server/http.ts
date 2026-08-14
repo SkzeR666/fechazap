@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { adminDb, userDb } from "../modules/auth/supabase";
+import { MercadoPagoError } from "../modules/payments/mercado-pago/client";
 
 export function apiError(error: unknown) {
   console.error(error);
@@ -8,6 +9,20 @@ export function apiError(error: unknown) {
       { error: "invalid_request", issues: error.issues },
       { status: 400 },
     );
+  if (error instanceof MercadoPagoError) {
+    const sameAccount = /payer.*collector|collector.*payer/i.test(
+      error.responseBody,
+    );
+    return Response.json(
+      {
+        error: "mercado_pago_error",
+        detail: sameAccount
+          ? "Use uma conta Mercado Pago diferente da conta vendedora."
+          : "O Mercado Pago recusou a criação do checkout. Confira o e-mail do pagador e tente novamente.",
+      },
+      { status: 502 },
+    );
+  }
   return Response.json({ error: "internal_error" }, { status: 500 });
 }
 

@@ -57,6 +57,7 @@ export default function BrandPage() {
           body: logoFile,
         });
         if (!put.ok) throw new Error("upload_failed");
+        await api.provider.confirmUpload(token, upload.upload);
         uploadedLogo = `${window.location.origin}${logoUrl(slug)}`;
       }
       await api.provider.saveProfile(token, {

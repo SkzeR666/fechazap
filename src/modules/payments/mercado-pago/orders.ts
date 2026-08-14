@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mpPost } from "./client";
+import { mpPostAs } from "./client";
 
 type PixOrder = {
   id: string;
@@ -17,12 +17,14 @@ type PixOrder = {
 };
 
 export async function createPixOrder(input: {
+  accessToken: string;
   quoteId: string;
   amountCents: number;
   email: string;
 }) {
   const amount = (input.amountCents / 100).toFixed(2);
-  const order = (await mpPost(
+  const order = (await mpPostAs(
+    input.accessToken,
     "/v1/orders",
     {
       type: "online",

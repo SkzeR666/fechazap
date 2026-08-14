@@ -12,6 +12,7 @@ import {
   Settings,
   Users,
   Wrench,
+  Plug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -25,6 +26,7 @@ const LINKS = [
   { href: "/dashboard/servicos", label: "Serviços", icon: Wrench },
   { href: "/dashboard/agenda", label: "Agenda", icon: Calendar },
   { href: "/dashboard/marca", label: "Marca", icon: Palette },
+  { href: "/dashboard/integracoes", label: "Integrações", icon: Plug },
   { href: "/dashboard/assinatura", label: "Assinatura", icon: CreditCard },
   { href: "/dashboard/configuracoes", label: "Configurações", icon: Settings },
 ];

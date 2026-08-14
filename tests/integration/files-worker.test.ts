@@ -25,6 +25,30 @@ const signedUrl = (
 };
 
 run("Cloudflare files Worker", () => {
+  it("allows browser preflight only from the FechaZap origins", async () => {
+    const allowed = await fetch(new URL("/files/preflight", base), {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://fechazap.vercel.app",
+        "Access-Control-Request-Method": "PUT",
+        "Access-Control-Request-Headers": "content-type",
+      },
+    });
+    expect(allowed.status).toBe(204);
+    expect(allowed.headers.get("access-control-allow-origin")).toBe(
+      "https://fechazap.vercel.app",
+    );
+    expect(allowed.headers.get("access-control-allow-methods")).toContain(
+      "PUT",
+    );
+
+    const denied = await fetch(new URL("/files/preflight", base), {
+      method: "OPTIONS",
+      headers: { Origin: "https://example.com" },
+    });
+    expect(denied.status).toBe(403);
+  });
+
   it("rejects unsigned access and completes a signed file lifecycle", async () => {
     const key = `users/integration/customers/test/quotes/test/pdfs/${Date.now()}.pdf`;
     const expires = Math.floor(Date.now() / 1000) + 300;
@@ -36,10 +60,14 @@ run("Cloudflare files Worker", () => {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Length": String(body.length),
+        Origin: "https://fechazap.vercel.app",
       },
       body,
     });
     expect(put.status).toBe(201);
+    expect(put.headers.get("access-control-allow-origin")).toBe(
+      "https://fechazap.vercel.app",
+    );
     try {
       const get = await fetch(signedUrl("GET", key, "", expires));
       expect(get.status).toBe(200);

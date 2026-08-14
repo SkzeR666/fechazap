@@ -1,6 +1,7 @@
 import { adminDb } from "../../auth/supabase";
 import { mercadoPagoWebhookEnv } from "../../platform/env";
-import { mpGet, validMpSignature } from "./client";
+import { mpGet, mpGetAs, validMpSignature } from "./client";
+import { sellerAccessToken } from "./connect";
 
 type WebhookBody = {
   id?: string | number;
@@ -91,6 +92,20 @@ export async function processMercadoPagoWebhook(request: Request) {
     }
 
     if (body.type === "order") {
+      const { data: paymentOwner, error: ownerError } = await db
+        .from("payments")
+        .select("quotes(user_id)")
+        .eq("provider", "mercado_pago")
+        .eq("provider_reference", dataId)
+        .single();
+      if (ownerError) throw ownerError;
+      const ownerQuote = Array.isArray(paymentOwner.quotes)
+        ? paymentOwner.quotes[0]
+        : paymentOwner.quotes;
+      const accessToken = ownerQuote?.user_id
+        ? await sellerAccessToken(ownerQuote.user_id)
+        : null;
+      if (!accessToken) throw new Error("mercado_pago_connection_not_found");
       // Dashboard simulations embed the complete synthetic order. Production
       // notifications normally carry only data.id and are fetched from MP.
       const order: MercadoPagoOrder = body.data?.status
@@ -99,7 +114,10 @@ export async function processMercadoPagoWebhook(request: Request) {
             status_detail: body.data.status_detail,
             external_reference: body.data.external_reference,
           }
-        : ((await mpGet(`/v1/orders/${dataId}`)) as MercadoPagoOrder);
+        : ((await mpGetAs(
+            accessToken,
+            `/v1/orders/${dataId}`,
+          )) as MercadoPagoOrder);
       const status = mapOrderStatus(order.status);
       const { error: paymentError } = await db
         .from("payments")
