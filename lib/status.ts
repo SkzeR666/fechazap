@@ -40,6 +40,7 @@ export function stampLabel(status: QuoteStatus, extra?: string) {
 
 export const CLOSING_FILTERS = [
   { id: "todos", label: "Todos" },
+  { id: "solicitacoes", label: "Solicitações" },
   { id: "rascunho", label: "Rascunho" },
   { id: "enviado", label: "Enviado" },
   { id: "aceito", label: "Aceito" },
@@ -52,7 +53,8 @@ export type ClosingFilter = (typeof CLOSING_FILTERS)[number]["id"];
 
 const FILTER_STATUSES: Record<ClosingFilter, QuoteStatus[]> = {
   todos: [],
-  rascunho: ["requested", "draft"],
+  solicitacoes: ["requested"],
+  rascunho: ["draft"],
   enviado: ["sent", "viewed"],
   aceito: ["accepted", "contracted"],
   pagamento: ["awaiting_payment", "partially_paid", "paid"],

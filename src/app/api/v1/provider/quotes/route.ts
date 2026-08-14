@@ -12,7 +12,7 @@ export async function GET(request: Request) {
       .parse(new URL(request.url).searchParams.get("status") ?? undefined);
     let query = auth.db
       .from("quotes")
-      .select("*, customers(*), quote_items(*)")
+      .select("*, customers(*), quote_items(*), appointments(*), quote_events(*)")
       .order("created_at", { ascending: false });
     if (status) query = query.eq("status", status);
     const { data, error } = await query;

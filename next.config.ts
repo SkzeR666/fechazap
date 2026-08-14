@@ -56,6 +56,21 @@ const nextConfig: NextConfig = {
         destination: "/app/fechamentos/:id",
         permanent: false,
       },
+      {
+        source: "/dashboard/orcamentos",
+        destination: "/app/fechamentos",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/assinatura",
+        destination: "/app/configuracoes/plano",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/marca",
+        destination: "/app/configuracoes/personalizacao",
+        permanent: false,
+      },
       { source: "/dashboard", destination: "/app", permanent: false },
       {
         source: "/dashboard/:path*",

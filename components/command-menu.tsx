@@ -22,6 +22,7 @@ import {
 
 const ACTIONS = [
   { href: "/app/novo", label: "Criar fechamento" },
+  { href: "/app/solicitacoes", label: "Ver solicitações" },
   { href: "/app/clientes", label: "Adicionar cliente" },
   { href: "/app/agenda", label: "Bloquear horário" },
   { href: "/app/financeiro", label: "Registrar pagamento" },

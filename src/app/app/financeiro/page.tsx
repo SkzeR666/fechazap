@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { api } from "@/src/lib/api/client";
 import { useAccessToken } from "@/hooks/use-access-token";
 import { Button } from "@/components/ui/button";
@@ -78,11 +79,20 @@ const SITUATION_LABEL: Record<Situation, string> = {
 
 export default function AppFinancePage() {
   const { token, ready } = useAccessToken();
+  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("todos");
   const quotes = useQuery({
     queryKey: ["quotes", token],
     queryFn: () => api.provider.quotes(token!),
     enabled: ready && Boolean(token),
+  });
+  const confirmPay = useMutation({
+    mutationFn: (id: string) => api.provider.confirmManualPayment(token!, id),
+    onSuccess: () => {
+      toast.success("Pagamento registrado.");
+      void queryClient.invalidateQueries({ queryKey: ["quotes"] });
+    },
+    onError: () => toast.error("Não foi possível registrar o pagamento."),
   });
 
   const rows = useMemo(() => {
@@ -164,6 +174,7 @@ export default function AppFinancePage() {
                 <TableHead>Fechamento</TableHead>
                 <TableHead>Valor</TableHead>
                 <TableHead>Situação</TableHead>
+                <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -185,6 +196,19 @@ export default function AppFinancePage() {
                       <Money cents={quote.total_cents} />
                     </TableCell>
                     <TableCell>{SITUATION_LABEL[situation]}</TableCell>
+                    <TableCell className="text-right">
+                      {situation === "receber" ||
+                      situation === "parcial" ||
+                      situation === "atraso" ? (
+                        <Button
+                          variant="outline"
+                          disabled={confirmPay.isPending}
+                          onClick={() => confirmPay.mutate(quote.id)}
+                        >
+                          Registrar pagamento
+                        </Button>
+                      ) : null}
+                    </TableCell>
                   </TableRow>
                 );
               })}

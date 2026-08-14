@@ -1,15 +1,16 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/brand-mark";
 import { appFrame } from "@/lib/utils";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t">
+    <footer className="border-t border-white/10 bg-black">
       <div className={`${appFrame} grid gap-8 py-10 md:grid-cols-[1fr_auto_auto]`}>
         <div>
-          <p className="font-heading text-lg font-semibold">FechaZap</p>
+          <BrandMark href="/" />
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-          Página de serviços + fluxo de fechamento. Sem marketplace, sem app
-          pro cliente.
+            Do orçamento ao serviço fechado. Em um link. Sem marketplace, sem
+            app pro cliente.
           </p>
         </div>
         <div className="grid gap-2 text-sm">

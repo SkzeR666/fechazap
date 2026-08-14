@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/field";
 import { createClient } from "@/lib/supabase/client";
+import { BrandMark } from "@/components/brand-mark";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { appFrame } from "@/lib/utils";
@@ -68,14 +69,12 @@ export function AuthForm({ mode }: { mode: "login" | "cadastro" }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="dark flex min-h-screen flex-col bg-black text-foreground">
       <SiteHeader />
       <main className={`${appFrame} flex flex-1 flex-col justify-center py-16`}>
       <div className="mx-auto w-full max-w-md">
-      <p className="font-mono text-sm tracking-widest text-primary uppercase">
-        FechaZap
-      </p>
-      <h1 className="mt-4 text-3xl font-semibold">
+      <BrandMark href="/" />
+      <h1 className="mt-6 text-3xl font-semibold">
         {mode === "login" ? "Entrar" : "Criar conta"}
       </h1>
       {confirmationSent ? (

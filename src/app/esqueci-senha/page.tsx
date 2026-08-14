@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="dark flex min-h-screen flex-col bg-black text-foreground">
       <SiteHeader />
       <main className={`${appFrame} flex flex-1 flex-col justify-center py-16`}>
         <div className="mx-auto w-full max-w-md">

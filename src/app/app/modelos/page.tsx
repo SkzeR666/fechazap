@@ -65,8 +65,7 @@ export default function AppTemplatesPage() {
       <div>
         <h2 className="text-lg font-semibold">Exemplos</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ideias prontas. O assistente de fechamento ainda pode ignorar o
-          conteúdo — o botão abre um fechamento novo.
+          Ideias prontas. Usar modelo abre um fechamento já com o serviço.
         </p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           {EXAMPLES.map((example) => (

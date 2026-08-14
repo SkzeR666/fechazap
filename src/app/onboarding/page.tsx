@@ -15,6 +15,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { BRAND_COLORS, logoUrl, slugify } from "@/lib/format";
 import { api } from "@/src/lib/api/client";
 import { appFrame, cn } from "@/lib/utils";
+import { BrandMark } from "@/components/brand-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -145,7 +146,7 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-screen">
       <div className={cn(appFrame, "flex items-center justify-between py-4")}>
-        <p className="font-heading text-lg font-semibold">FechaZap</p>
+        <BrandMark href="/app" />
         <ThemeToggle />
       </div>
       <div className={appFrame}>

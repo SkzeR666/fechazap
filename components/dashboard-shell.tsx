@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   Calendar,
+  Inbox,
   LayoutDashboard,
   Menu,
   Plus,
@@ -23,11 +24,13 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { createClient } from "@/lib/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/brand-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const PRIMARY = [
   { href: "/app", label: "Início", icon: LayoutDashboard },
   { href: "/app/fechamentos", label: "Fechamentos", icon: ClipboardList },
+  { href: "/app/solicitacoes", label: "Solicitações", icon: Inbox },
   { href: "/app/clientes", label: "Clientes", icon: Users },
   { href: "/app/agenda", label: "Agenda", icon: Calendar },
   { href: "/app/financeiro", label: "Financeiro", icon: Wallet },
@@ -101,9 +104,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <div className="mx-auto grid min-h-screen w-full max-w-[1440px] md:grid-cols-[240px_1fr]">
         <aside className="hidden border-r bg-card p-4 md:flex md:flex-col">
-          <Link href="/app" className="mb-4 font-heading text-xl font-semibold">
-            FechaZap
-          </Link>
+          <BrandMark href="/app" className="mb-4" />
           <Button asChild variant="accent" className="mb-6">
             <Link href="/app/novo">
               <Plus className="size-4" />
@@ -120,9 +121,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </aside>
         <div className="flex min-h-screen flex-col">
           <header className="flex items-center justify-between border-b px-4 py-3">
-            <Link href="/app" className="font-heading text-lg font-semibold md:hidden">
-              FechaZap
-            </Link>
+            <BrandMark href="/app" size="sm" className="md:hidden" />
             <p className="hidden text-sm text-muted-foreground md:block">
               {profile.data?.data?.business_name ?? "Seu negócio"}
             </p>

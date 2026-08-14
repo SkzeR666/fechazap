@@ -27,6 +27,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { QuoteListRow } from "@/src/lib/api/types";
 import type { QuoteStatus } from "@/src/domain/quote-state";
+import { upcomingSelected } from "@/lib/schedule";
+import { addDays, startOfDay } from "date-fns";
 
 const CLOSED: QuoteStatus[] = [
   "paid",
@@ -113,7 +115,8 @@ export default function HomePage() {
 
   const metrics = computeMetrics(rows);
   const attention = rows.filter((quote) => needsAttention(quote.status));
-  const upcoming = rows.filter((quote) => quote.status === "scheduled");
+  const from = startOfDay(new Date());
+  const upcoming = upcomingSelected(rows, from, addDays(from, 7));
 
   return (
     <div className="grid gap-8">
@@ -149,7 +152,7 @@ export default function HomePage() {
         />
         <MetricCard
           label="Serviços agendados"
-          value={String(metrics.scheduledCount)}
+          value={String(upcoming.length)}
           hint="Próximos 7 dias"
         />
         <MetricCard
@@ -226,35 +229,30 @@ export default function HomePage() {
           </p>
         ) : (
           <ul className="divide-y">
-            {upcoming.map((quote) => {
-              const customer = one(quote.customers);
-              return (
-                <li key={quote.id}>
-                  <Link
-                    href={`/app/fechamentos/${quote.id}`}
-                    className="flex items-center justify-between gap-4 px-4 py-4"
-                  >
-                    <div>
-                      <p className="font-medium">
-                        {customer?.name ?? "Cliente"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {quote.title ?? "Serviço"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <Timestamp
-                        iso={quote.updated_at}
-                        className="text-sm text-muted-foreground"
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        Confirmado
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              );
-            })}
+            {upcoming.map((event) => (
+              <li key={event.id}>
+                <Link
+                  href={event.href ?? `/app/fechamentos/${event.quoteId}`}
+                  className="flex items-center justify-between gap-4 px-4 py-4"
+                >
+                  <div>
+                    <p className="font-medium">{event.customer}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {event.title}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Timestamp
+                      iso={event.startsAt}
+                      className="text-sm text-muted-foreground"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Confirmado
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            ))}
           </ul>
         )}
       </Card>

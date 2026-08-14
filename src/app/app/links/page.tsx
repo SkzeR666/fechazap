@@ -36,8 +36,8 @@ export default function AppLinksPage() {
       <div>
         <h1 className="text-2xl font-semibold">Links</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Link permanente: o endereço da sua página pública. Não muda a cada
-          fechamento — vale na bio, no cartão e no WhatsApp.
+          Link permanente: o endereço da sua página pública. Quem pedir
+          atendimento aparece em Solicitações.
         </p>
       </div>
       {url ? (
@@ -58,6 +58,9 @@ export default function AppLinksPage() {
               <Link href={`/${slug}`} target="_blank">
                 Página pública
               </Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/app/solicitacoes">Solicitações</Link>
             </Button>
           </div>
         </Card>

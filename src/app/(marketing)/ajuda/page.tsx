@@ -63,7 +63,7 @@ export default function HelpPage() {
           Do orçamento ao serviço fechado.
         </h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
-          Orçamento, aceite, pagamento e agendamento em um único link. O cliente
+          Proposta, aceite, pagamento e agendamento em um único link. O cliente
           nunca cria conta.
         </p>
         <Accordion type="single" collapsible className="mt-10 w-full">

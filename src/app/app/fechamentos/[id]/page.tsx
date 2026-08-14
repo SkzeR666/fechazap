@@ -60,12 +60,10 @@ export default function FechamentoDetailPage() {
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
   const action = nextActionCopy(quote.status);
-  const proposalMessage = interpolate(MESSAGE_TEMPLATES.novaProposta, {
-    cliente: customerName,
-    link,
-  });
   const reminderMessage = interpolate(
-    quote.status === "sent" || quote.status === "viewed" || quote.status === "draft"
+    quote.status === "sent" ||
+      quote.status === "viewed" ||
+      quote.status === "draft"
       ? MESSAGE_TEMPLATES.novaProposta
       : quote.status === "paid" || quote.status === "scheduling_pending"
         ? MESSAGE_TEMPLATES.agendamento
@@ -101,9 +99,18 @@ export default function FechamentoDetailPage() {
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="accent">
             <a
-              href={whatsappUrl(customerPhone, proposalMessage)}
+              href={whatsappUrl(customerPhone, reminderMessage)}
               target="_blank"
               rel="noreferrer"
+              onClick={() => {
+                if (!token) return;
+                if (quote.status === "draft" || quote.status === "requested") {
+                  void api.provider
+                    .transition(token, id, "sent")
+                    .then(() => refresh())
+                    .catch(() => undefined);
+                }
+              }}
             >
               Enviar proposta pelo WhatsApp
             </a>
@@ -151,14 +158,16 @@ export default function FechamentoDetailPage() {
       ) : null}
 
       {quote.status === "requested" ? (
-        <RequestResponse
-          quoteId={id}
-          token={token}
-          initialTitle={quote.title ?? quote.message ?? "Pedido solicitado"}
-          customerName={customerName}
-          customerPhone={customerPhone}
-          publicLink={link}
-        />
+        <div id="responder">
+          <RequestResponse
+            quoteId={id}
+            token={token}
+            initialTitle={quote.title ?? quote.message ?? "Pedido solicitado"}
+            customerName={customerName}
+            customerPhone={customerPhone}
+            publicLink={link}
+          />
+        </div>
       ) : null}
 
       {quote.status === "awaiting_payment" ||
@@ -302,8 +311,19 @@ function NextActionButton({
       </Button>
     );
   }
-  if (cta === "Responder" || cta === "Agendar") {
-    return null;
+  if (cta === "Responder") {
+    return (
+      <Button asChild variant="accent" className="w-fit">
+        <a href="#responder">{cta}</a>
+      </Button>
+    );
+  }
+  if (cta === "Agendar") {
+    return (
+      <Button asChild variant="accent" className="w-fit">
+        <a href="#horarios">{cta}</a>
+      </Button>
+    );
   }
   return (
     <Button
@@ -459,11 +479,11 @@ function OfferSlots({
       toast.success("Horários enviados.");
       void queryClient.invalidateQueries({ queryKey: ["quote", quoteId] });
     },
-    onError: () => toast.error("Ofereça de 2 a 5 horários."),
+    onError: () => toast.error("Ofereça de 1 a 5 horários."),
   });
 
   return (
-    <Card className="grid max-w-md gap-3 p-4">
+    <Card id="horarios" className="grid max-w-md gap-3 p-4">
       <h2 className="font-medium">Oferecer horários</h2>
       {slots.map((slot, index) => (
         <Input

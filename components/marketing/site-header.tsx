@@ -6,7 +6,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { cn, appFrame } from "@/lib/utils";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { BrandMark } from "@/components/brand-mark";
 
 const LINKS = [
   { href: "/#como-funciona", label: "Como funciona" },
@@ -20,14 +20,12 @@ export function SiteHeader({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm",
+        "sticky top-0 z-40 border-b border-white/10 bg-black/80 backdrop-blur-sm",
         className,
       )}
     >
       <div className={cn(appFrame, "flex h-14 items-center justify-between")}>
-        <Link href="/" className="font-heading text-lg font-semibold tracking-tight">
-          FechaZap
-        </Link>
+        <BrandMark href="/" />
         <nav className="hidden items-center gap-6 text-sm md:flex">
           {LINKS.map((link) => (
             <Link
@@ -40,7 +38,6 @@ export function SiteHeader({ className }: { className?: string }) {
           ))}
         </nav>
         <div className="hidden items-center gap-2 md:flex">
-          <ThemeToggle />
           <Button asChild variant="ghost">
             <Link href="/entrar">Entrar</Link>
           </Button>
@@ -49,7 +46,6 @@ export function SiteHeader({ className }: { className?: string }) {
           </Button>
         </div>
         <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
@@ -58,7 +54,9 @@ export function SiteHeader({ className }: { className?: string }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-6">
-              <SheetTitle>FechaZap</SheetTitle>
+              <SheetTitle>
+                <BrandMark href="/" />
+              </SheetTitle>
               <nav className="mt-6 grid gap-3 text-sm">
                 {LINKS.map((link) => (
                   <Link

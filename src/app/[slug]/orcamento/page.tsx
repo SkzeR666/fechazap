@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NarrowPage } from "@/components/narrow-page";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 const schema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -27,7 +29,23 @@ const schema = z.object({
 });
 
 export default function PublicQuoteRequestPage() {
+  return (
+    <Suspense
+      fallback={
+        <NarrowPage>
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="mt-6 h-40" />
+        </NarrowPage>
+      }
+    >
+      <QuoteRequestForm />
+    </Suspense>
+  );
+}
+
+function QuoteRequestForm() {
   const { slug } = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
   const [sent, setSent] = useState(false);
   const [pending, setPending] = useState(false);
   const [serviceId, setServiceId] = useState<string>("");
@@ -36,6 +54,13 @@ export default function PublicQuoteRequestPage() {
     queryFn: () => api.public.profile(slug),
     enabled: Boolean(slug),
   });
+
+  useEffect(() => {
+    const fromQuery = searchParams.get("servico");
+    if (fromQuery && z.string().uuid().safeParse(fromQuery).success) {
+      setServiceId(fromQuery);
+    }
+  }, [searchParams]);
 
   async function onSubmit(formData: FormData) {
     const parsed = schema.safeParse({
@@ -63,26 +88,34 @@ export default function PublicQuoteRequestPage() {
     }
   }
 
+  const selected = profile.data?.services.find((item) => item.id === serviceId);
+
   if (sent) {
     return (
       <NarrowPage className="text-center">
         <h1 className="text-2xl font-semibold">Pedido enviado</h1>
         <p className="mt-3 text-muted-foreground">
-          O prestador vai montar a proposta e te enviar o link.
+          {profile.data?.businessName} vai montar a proposta e te enviar o
+          link. Sem criar conta.
         </p>
+        <Button asChild variant="outline" className="mt-6">
+          <Link href={`/${slug}`}>Voltar à página</Link>
+        </Button>
       </NarrowPage>
     );
   }
 
   return (
     <NarrowPage>
-        <h1 className="text-2xl font-semibold">Solicitar atendimento</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {profile.data?.businessName}
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Qual serviço você procura?
-        </p>
+      <p className="font-mono text-xs tracking-widest text-primary uppercase">
+        {profile.data?.businessName}
+      </p>
+      <h1 className="mt-2 text-2xl font-semibold">Solicitar atendimento</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {selected
+          ? `Serviço: ${selected.name}. Preencha seus dados — o prestador responde com o link de fechamento.`
+          : "Qual serviço você procura? O prestador monta a proposta e envia o link."}
+      </p>
       <form action={onSubmit} className="mt-8 grid gap-4">
         <Field label="Seu nome" htmlFor="name">
           <Input id="name" name="name" required />
@@ -92,7 +125,10 @@ export default function PublicQuoteRequestPage() {
         </Field>
         {profile.data?.services.length ? (
           <Field label="Serviço">
-            <Select value={serviceId} onValueChange={setServiceId}>
+            <Select
+              value={serviceId || undefined}
+              onValueChange={setServiceId}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Escolher (opcional)" />
               </SelectTrigger>
@@ -115,7 +151,7 @@ export default function PublicQuoteRequestPage() {
           className="h-11"
           disabled={pending}
         >
-          {pending ? "Enviando..." : "Solicitar orçamento"}
+          {pending ? "Enviando..." : "Solicitar atendimento"}
         </Button>
       </form>
     </NarrowPage>

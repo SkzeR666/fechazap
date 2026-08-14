@@ -5,11 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "FechaZap",
     short_name: "FechaZap",
     description:
-      "Orçamentos, contratos, PIX e agenda para prestadores de serviço.",
-    start_url: "/",
+      "Proposta, aceite, Pix e agenda para prestadores de serviço.",
+    start_url: "/app",
     display: "standalone",
-    background_color: "#F6F5F1",
-    theme_color: "#0E6B4F",
+    background_color: "#000000",
+    theme_color: "#EAB308",
     lang: "pt-BR",
   };
 }

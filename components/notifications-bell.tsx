@@ -21,6 +21,12 @@ import type { QuoteListRow } from "@/src/lib/api/types";
 
 function notificationFor(quote: QuoteListRow) {
   const name = one(quote.customers)?.name ?? "Cliente";
+  if (quote.status === "requested") {
+    return {
+      title: `${name} pediu atendimento na página`,
+      at: quote.created_at,
+    };
+  }
   if (quote.status === "viewed") {
     return {
       title: `${name} visualizou sua proposta`,
@@ -80,7 +86,8 @@ export function NotificationsBell() {
         </PopoverHeader>
         {items.length === 0 ? (
           <p className="px-3 py-4 text-sm text-muted-foreground">
-            Quando o cliente abrir, aceitar, pagar ou agendar, aparece aqui.
+            Quando o cliente pedir, abrir, aceitar, pagar ou agendar, aparece
+            aqui.
           </p>
         ) : (
           <ul className="max-h-80 overflow-y-auto">

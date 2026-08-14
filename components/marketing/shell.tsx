@@ -6,7 +6,7 @@ import { cn, appFrame } from "@/lib/utils";
 
 export function MarketingShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="dark flex min-h-screen flex-col bg-black text-foreground">
       <SiteHeader />
       <div className="flex-1">{children}</div>
       <SiteFooter />
@@ -16,7 +16,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
 
 export function MarketingCta({
   title,
-  description = "Crie sua proposta, envie o link e acompanhe o cliente até o atendimento.",
+  description = "Crie o fechamento, envie o link e acompanhe o cliente até o atendimento.",
   href = "/criar-conta",
 }: {
   title: string;
@@ -24,7 +24,7 @@ export function MarketingCta({
   href?: string;
 }) {
   return (
-    <section className="border-t bg-muted/40">
+    <section className="border-t border-white/10 bg-black">
       <div
         className={cn(
           appFrame,

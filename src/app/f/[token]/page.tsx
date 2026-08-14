@@ -18,6 +18,7 @@ import { STATUS_LABEL, isStamped, stampLabel } from "@/lib/status";
 import { daysUntil } from "@/lib/relative-time";
 import type { QuoteStatus } from "@/src/domain/quote-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parseClosingMeta } from "@/lib/closing-meta";
 import { NarrowPage } from "@/components/narrow-page";
 import { MESSAGE_TEMPLATES } from "@/lib/messages";
 import { whatsappUrl } from "@/src/lib/whatsapp";
@@ -75,6 +76,7 @@ export default function PublicClosingPage() {
   const quote = quoteQuery.data;
   const animate = stampKey > 0;
   const closed = isClosedStatus(quote.status);
+  const meta = parseClosingMeta(quote.message);
   const expired =
     quote.status === "expired" ||
     (Boolean(quote.expiresAt) &&
@@ -102,14 +104,17 @@ export default function PublicClosingPage() {
         <AcceptedPending token={token} onDone={refresh} />
       ) : null}
 
-      {quote.status === "awaiting_payment" ||
-      quote.status === "contracted" ||
-      quote.status === "partially_paid" ? (
+      {(quote.status === "awaiting_payment" ||
+        quote.status === "contracted" ||
+        quote.status === "partially_paid") &&
+      meta.payment !== "none" ? (
         <PixPanel quote={quote} />
       ) : null}
 
       {quote.status === "paid" || quote.status === "scheduling_pending" ? (
-        scheduling ? (
+        meta.schedule === "later" ? (
+          <LaterPanel quote={quote} skippedPay={meta.payment === "none"} />
+        ) : meta.payment === "none" || scheduling ? (
           <SlotsPanel quote={quote} token={token} onDone={refresh} />
         ) : (
           <PaidPanel quote={quote} onSchedule={() => setScheduling(true)} />
@@ -652,12 +657,47 @@ function isDepositItem(item: PublicQuoteItem) {
 }
 
 function mentionsSinal(quote: PublicQuote) {
+  const meta = parseClosingMeta(quote.message);
+  if (meta.payment === "deposit") return true;
   if (/\bsinal\b/i.test(quote.message ?? "")) return true;
   return quote.items.some(isDepositItem);
 }
 
 function depositCents(quote: PublicQuote) {
+  const meta = parseClosingMeta(quote.message);
+  if (meta.payment === "deposit" && meta.depositCents) return meta.depositCents;
+  if (meta.payment === "full") return quote.totalCents;
   return quote.items.find(isDepositItem)?.totalCents ?? null;
+}
+
+function LaterPanel({
+  quote,
+  skippedPay,
+}: {
+  quote: PublicQuote;
+  skippedPay: boolean;
+}) {
+  const chatHref = providerWhatsApp(
+    quote,
+    "Oi! Quero combinar o horário do atendimento.",
+  );
+  return (
+    <div className="text-center">
+      <h1 className="text-2xl font-semibold">
+        {skippedPay ? "Serviço confirmado ✓" : "Pagamento confirmado ✓"}
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        O horário ainda vai ser combinado com {quote.provider.businessName}.
+      </p>
+      {chatHref ? (
+        <Button asChild variant="accent" className="mt-6 h-11 w-full">
+          <a href={chatHref} target="_blank" rel="noreferrer">
+            Combinar horário no WhatsApp
+          </a>
+        </Button>
+      ) : null}
+    </div>
+  );
 }
 
 function isClosedStatus(status: QuoteStatus) {

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { apiError, authenticatedDb } from "@/src/server/http";
 const schema = z.object({
-  slots: z.array(z.string().datetime()).min(2).max(5),
+  slots: z.array(z.string().datetime()).min(1).max(5),
 });
 export async function POST(
   request: Request,

@@ -1,6 +1,7 @@
 import { adminDb } from "@/src/modules/auth/supabase";
 import { createDownloadUrl } from "@/src/modules/files/service";
 import { apiError, rateLimit } from "@/src/server/http";
+import { parseClosingMeta } from "@/lib/closing-meta";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,7 @@ export async function GET(
       ![
         "contracted",
         "awaiting_payment",
+        "scheduling_pending",
         "paid",
         "scheduled",
         "completed",
@@ -56,7 +58,8 @@ export async function POST(
     if (!(await rateLimit(request, "quote-contract", 10, 300)))
       return Response.json({ error: "rate_limited" }, { status: 429 });
     const { token } = await params;
-    const { data, error } = await adminDb().rpc("accept_public_contract", {
+    const db = adminDb();
+    const { data, error } = await db.rpc("accept_public_contract", {
       p_public_token: token,
     });
     if (error)
@@ -64,6 +67,27 @@ export async function POST(
         { error: "contract_not_acceptable", detail: error.message },
         { status: 409 },
       );
+    const { data: quote } = await db
+      .from("quotes")
+      .select("id, message, status")
+      .eq("public_token", token)
+      .maybeSingle();
+    if (quote) {
+      const meta = parseClosingMeta(quote.message);
+      if (meta.payment === "none") {
+        const nextStatus =
+          meta.schedule === "now" ? "scheduled" : "scheduling_pending";
+        await db.from("quotes").update({ status: nextStatus }).eq("id", quote.id);
+        if (meta.schedule === "now") {
+          await db
+            .from("appointments")
+            .update({ status: "selected", selected_at: new Date().toISOString() })
+            .eq("quote_id", quote.id)
+            .eq("status", "offered");
+        }
+        return Response.json({ id: quote.id, status: nextStatus });
+      }
+    }
     return Response.json(data);
   } catch (error) {
     return apiError(error);

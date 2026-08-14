@@ -23,6 +23,7 @@ import { Money, formatBRL, formatDateTime } from "@/components/money";
 import { publicClosingUrl, reaisToCents } from "@/lib/format";
 import { interpolate, MESSAGE_TEMPLATES } from "@/lib/messages";
 import { whatsappUrl } from "@/src/lib/whatsapp";
+import { serializeClosingMeta } from "@/lib/closing-meta";
 import { cn } from "@/lib/utils";
 
 const STEPS = [
@@ -115,10 +116,15 @@ function itemDescription(item: LineItem) {
 }
 
 function buildMessage(values: FormValues, totals: { total: number }) {
+  const depositCents =
+    values.paymentMode === "deposit"
+      ? (reaisToCents(values.depositAmount) ?? 0)
+      : values.paymentMode === "full"
+        ? totals.total
+        : null;
   const lines: string[] = [];
   if (values.paymentMode === "deposit") {
-    const depositCents = reaisToCents(values.depositAmount) ?? 0;
-    lines.push(`Sinal: ${formatBRL(depositCents)}`);
+    lines.push(`Sinal: ${formatBRL(depositCents ?? 0)}`);
     lines.push("Forma: Pix");
   } else if (values.paymentMode === "full") {
     lines.push(`Pagamento integral: ${formatBRL(totals.total)}`);
@@ -138,6 +144,18 @@ function buildMessage(values: FormValues, totals: { total: number }) {
   } else {
     lines.push("Agendamento: combinar depois");
   }
+  const when =
+    values.scheduleMode === "now" && values.scheduledAt
+      ? new Date(values.scheduledAt).toISOString()
+      : null;
+  lines.push(
+    serializeClosingMeta({
+      payment: values.paymentMode,
+      depositCents,
+      schedule: values.scheduleMode,
+      when,
+    }),
+  );
   return lines.join("\n").slice(0, 2000);
 }
 
@@ -218,6 +236,18 @@ export default function NewClosingPage() {
     form.setValue("customerEmail", match.email ?? "");
   }, [customerList, form.setValue]);
 
+  const servicePrefill = useRef(false);
+  useEffect(() => {
+    if (servicePrefill.current || catalog.length === 0) return;
+    const serviceId = new URLSearchParams(window.location.search).get("servico");
+    if (!serviceId) return;
+    const match = catalog.find((row) => row.id === serviceId);
+    if (!match) return;
+    servicePrefill.current = true;
+    addFromCatalog(match);
+    setStep(1);
+  }, [catalog]);
+
   function selectCustomer(customer: CustomerRow) {
     form.setValue("customerName", customer.name);
     form.setValue("customerPhone", customer.phone);
@@ -233,7 +263,10 @@ export default function NewClosingPage() {
       unitPrice:
         service.price_cents != null ? centsToReaisInput(service.price_cents) : "",
       notes: service.description ?? "",
-      duration: "",
+      duration:
+        service.duration_minutes != null
+          ? `${service.duration_minutes} min`
+          : "",
     });
     setPickerOpen(false);
   }
@@ -391,6 +424,10 @@ export default function NewClosingPage() {
           sortOrder: index,
         })),
       });
+      if (values.scheduleMode === "now" && values.scheduledAt) {
+        const iso = new Date(values.scheduledAt).toISOString();
+        await api.provider.offerAppointments(token, quote.id, [iso]);
+      }
       void queryClient.invalidateQueries({ queryKey: ["quotes"] });
       void queryClient.invalidateQueries({ queryKey: ["customers"] });
       if (mode === "send") {

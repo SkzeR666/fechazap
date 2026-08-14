@@ -34,8 +34,8 @@ export function ProductPreview() {
         <p className="mt-2 font-mono text-xs text-muted-foreground">
           Sinal de <Money cents={50000} /> · Válido até 20/08
         </p>
-        <div className="mt-6 rounded-md bg-accent px-3 py-2.5 text-center text-sm font-medium text-accent-foreground">
-          Aceitar proposta
+        <div className="mt-6 rounded-md bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground">
+          Quero fechar
         </div>
       </Card>
 

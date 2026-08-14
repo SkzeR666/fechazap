@@ -195,11 +195,14 @@ export type QuoteRow = {
   updated_at: string;
   contract_terms: string | null;
   contract_generated_at: string | null;
+  loss_reason?: string | null;
 };
 
 export type QuoteListRow = QuoteRow & {
   customers: CustomerRow | CustomerRow[] | null;
   quote_items: QuoteItemRow[] | null;
+  appointments?: AppointmentRow[] | null;
+  quote_events?: QuoteEventRow[] | null;
 };
 
 export type QuoteEventRow = {
