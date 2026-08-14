@@ -14,6 +14,22 @@ const schema = z.object({
   pixKey: z.string().trim().max(180).optional(),
 });
 
+export async function GET(request: Request) {
+  try {
+    const auth = await authenticatedDb(request);
+    if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
+    const { data, error } = await auth.db
+      .from("profiles")
+      .select("*")
+      .eq("user_id", auth.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    return Response.json({ data });
+  } catch (error) {
+    return apiError(error);
+  }
+}
+
 export async function PUT(request: Request) {
   try {
     const auth = await authenticatedDb(request);

@@ -1,9 +1,10 @@
-# FechaZap API
+# FechaZap
 
-Backend-first do FechaZap em Next.js App Router. O projeto não contém frontend nesta fase.
+Backend e frontend do FechaZap em Next.js App Router: orçamento, contrato, PIX e agenda.
 
 ## Serviços
 
+- `src/app`: páginas públicas, dashboard e Route Handlers.
 - `src/modules/auth`: autenticação e clientes Supabase com RLS.
 - `src/modules/files`: hierarquia de objetos e URLs HMAC do Worker Cloudflare.
 - `src/modules/payments`: API Orders, assinaturas e webhook do Mercado Pago.
@@ -52,6 +53,7 @@ npm run build
 | GET                  | `/api/health`                                       | público                    |
 | GET                  | `/api/openapi`                                      | público                    |
 | GET/PUT              | `/api/v1/provider/profile`                          | Supabase JWT               |
+| GET                  | `/api/v1/provider/customers`                        | Supabase JWT               |
 | GET/POST             | `/api/v1/provider/services`                         | Supabase JWT               |
 | PATCH/DELETE         | `/api/v1/provider/services/:id`                     | Supabase JWT               |
 | GET/POST             | `/api/v1/provider/quotes`                           | Supabase JWT               |
@@ -65,8 +67,11 @@ npm run build
 | POST                 | `/api/v1/provider/files/upload-url`                 | Supabase JWT               |
 | GET/DELETE           | `/api/v1/provider/files/:id`                        | Supabase JWT               |
 | GET                  | `/api/v1/public/:slug`                              | público                    |
+| GET                  | `/api/v1/public/:slug/logo`                         | público                    |
 | POST                 | `/api/v1/public/:slug/requests`                     | público + rate limit       |
+| GET                  | `/api/v1/public/quotes/:token`                      | token público              |
 | POST                 | `/api/v1/public/quotes/:token/accept`               | token público + rate limit |
+| GET/POST             | `/api/v1/public/quotes/:token/contract`             | token público              |
 | POST                 | `/api/v1/public/quotes/:token/appointments/:id`     | token público              |
 | POST                 | `/api/webhooks/mercado-pago`                        | assinatura Mercado Pago    |
 | GET                  | `/api/cron/reminders`                               | `CRON_SECRET`              |

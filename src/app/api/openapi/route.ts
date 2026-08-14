@@ -25,11 +25,21 @@ export function GET() {
     paths: {
       "/health": { get: { ...response("Healthy"), summary: "Saúde da API" } },
       "/v1/public/{slug}": { get: operation("Consultar perfil público") },
+      "/v1/public/{slug}/logo": {
+        get: operation("Redirecionar logo pública"),
+      },
       "/v1/public/{slug}/requests": {
         post: operation("Solicitar orçamento público"),
       },
+      "/v1/public/quotes/{token}": {
+        get: operation("Consultar orçamento público"),
+      },
       "/v1/public/quotes/{token}/accept": {
         post: operation("Aceitar orçamento"),
+      },
+      "/v1/public/quotes/{token}/contract": {
+        get: operation("Baixar contrato público"),
+        post: operation("Aceitar contrato público"),
       },
       "/v1/public/quotes/{token}/appointments/{id}": {
         post: operation("Escolher horário"),
@@ -37,6 +47,9 @@ export function GET() {
       "/v1/provider/profile": {
         get: operation("Consultar perfil", true),
         put: operation("Atualizar perfil", true),
+      },
+      "/v1/provider/customers": {
+        get: operation("Listar clientes", true),
       },
       "/v1/provider/services": {
         get: operation("Listar serviços", true),
