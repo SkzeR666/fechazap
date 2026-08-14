@@ -76,7 +76,14 @@ const nextConfig: NextConfig = {
       },
       {
         source:
-          "/:path(dashboard|onboarding|login|cadastro|esqueci-senha|redefinir-senha)(.*)",
+          "/:path(app|dashboard|onboarding|entrar|criar-conta|recuperar-senha|login|cadastro|esqueci-senha|redefinir-senha)(.*)",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+      {
+        source: "/f(.*)",
         headers: [
           { key: "Cache-Control", value: "private, no-store, max-age=0" },
           { key: "X-Robots-Tag", value: "noindex, nofollow" },

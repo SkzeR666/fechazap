@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { api } from "@/src/lib/api/client";
 import type { CustomerRow, ServiceRow } from "@/src/lib/api/types";
 import { useAccessToken } from "@/hooks/use-access-token";
-import { useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -146,7 +145,6 @@ export default function NewClosingPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { token, ready } = useAccessToken();
-  const profile = useProfile();
   const [step, setStep] = useState(0);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [customName, setCustomName] = useState("");
@@ -215,9 +213,10 @@ export default function NewClosingPage() {
     const match = customerList.find((row) => row.id === clienteId);
     if (!match) return;
     prefilling.current = true;
-    selectCustomer(match);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot prefill from ?cliente=
-  }, [customerList]);
+    form.setValue("customerName", match.name);
+    form.setValue("customerPhone", match.phone);
+    form.setValue("customerEmail", match.email ?? "");
+  }, [customerList, form.setValue]);
 
   function selectCustomer(customer: CustomerRow) {
     form.setValue("customerName", customer.name);
@@ -1029,13 +1028,13 @@ export default function NewClosingPage() {
                   ? ` · ${formatDateTime(new Date(form.getValues("scheduledAt")).toISOString())}`
                   : ""}
               </p>
-              {profile.data?.data?.business_name ? (
-                <p className="text-muted-foreground">
-                  {profile.data.data.business_name} · expira em 7 dias
-                </p>
-              ) : (
-                <p className="text-muted-foreground">Expira em 7 dias</p>
-              )}
+              <p>
+                <span className="text-muted-foreground">Validade da proposta: </span>
+                {new Intl.DateTimeFormat("pt-BR", {
+                  day: "numeric",
+                  month: "long",
+                }).format(new Date(Date.now() + 7 * 86_400_000))}
+              </p>
             </div>
           </Card>
 

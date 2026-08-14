@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import { apiError, authenticatedDb, validatedJson } from "@/src/server/http";
 
 const schema = z.object({
   rules: z
@@ -33,7 +33,7 @@ export async function PUT(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
-    const body = schema.parse(await request.json());
+    const body = await validatedJson(request, schema, 8_192);
     const { error: deleteError } = await auth.db
       .from("availability_rules")
       .delete()
@@ -51,8 +51,7 @@ export async function PUT(request: Request) {
           enabled: rule.enabled,
         })),
       )
-      .select()
-      .order("weekday");
+      .select();
     if (error) throw error;
     return Response.json({ data });
   } catch (error) {

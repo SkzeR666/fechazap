@@ -68,7 +68,7 @@ export default function PublicQuoteRequestPage() {
       <NarrowPage className="text-center">
         <h1 className="text-2xl font-semibold">Pedido enviado</h1>
         <p className="mt-3 text-muted-foreground">
-          O prestador vai montar o orçamento e te enviar o link.
+          O prestador vai montar a proposta e te enviar o link.
         </p>
       </NarrowPage>
     );
@@ -76,10 +76,13 @@ export default function PublicQuoteRequestPage() {
 
   return (
     <NarrowPage>
-      <h1 className="text-2xl font-semibold">Pedir orçamento</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {profile.data?.businessName}
-      </p>
+        <h1 className="text-2xl font-semibold">Solicitar atendimento</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {profile.data?.businessName}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Qual serviço você procura?
+        </p>
       <form action={onSubmit} className="mt-8 grid gap-4">
         <Field label="Seu nome" htmlFor="name">
           <Input id="name" name="name" required />
@@ -112,7 +115,7 @@ export default function PublicQuoteRequestPage() {
           className="h-11"
           disabled={pending}
         >
-          {pending ? "Enviando..." : "Enviar pedido"}
+          {pending ? "Enviando..." : "Solicitar orçamento"}
         </Button>
       </form>
     </NarrowPage>

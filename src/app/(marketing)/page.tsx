@@ -73,15 +73,15 @@ const GRID = [
   },
   {
     t: "Aceite",
-    d: "Confirma com nome e CPF. Fica registrado — sem contrato no Word.",
+    d: "Seu cliente confirma sem criar conta.",
   },
   {
     t: "Pagamento",
-    d: "PIX da sua chave, QR e copia-e-cola. Você confirma o sinal.",
+    d: "Receba sinal ou valor integral.",
   },
   {
     t: "Agenda",
-    d: "Você oferece horários. O cliente escolhe um e pronto.",
+    d: "Deixe o cliente escolher entre seus horários disponíveis.",
   },
   {
     t: "Clientes",
@@ -89,7 +89,7 @@ const GRID = [
   },
   {
     t: "Acompanhamento",
-    d: "Cada etapa carimbada. Proposta visualizada, aceitou, sinal pago, agendado.",
+    d: "Saiba quem abriu, aceitou, pagou ou ainda precisa responder.",
   },
 ];
 
@@ -127,7 +127,8 @@ export default function HomePage() {
           link.
         </p>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Orçamento, aceite, pagamento e agendamento em um único link.
+          Envie sua proposta, receba o aceite, confirme o pagamento e organize o
+          agendamento sem depender de dezenas de mensagens no WhatsApp.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="accent" size="lg" className="h-11">
@@ -140,6 +141,22 @@ export default function HomePage() {
         <p className="mt-4 font-mono text-sm text-muted-foreground">
           Grátis para começar · Sem cartão
         </p>
+        <ol className="mt-12 grid max-w-xl gap-2 text-sm">
+          {[
+            "Mariana Costa",
+            "Proposta visualizada",
+            "Aceitou",
+            "Sinal pago",
+            "Agendado",
+          ].map((step, index) => (
+            <li key={step} className="flex items-center gap-3">
+              <span className="font-mono text-xs text-muted-foreground">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </section>
 
       <section className="border-t">
@@ -148,13 +165,12 @@ export default function HomePage() {
             Fechar um serviço não deveria dar tanto trabalho.
           </h2>
           <p className="mt-4 max-w-2xl text-muted-foreground">
-            WhatsApp é ótimo pra conversar. Péssimo pra fechar, cobrar e
-            agendar. O “vou ver e te aviso” vira conversa infinita, comprovante
-            perdido e horário que ninguém confirmou.
+            Você manda preço. Confirma detalhes. Cobra sinal. Procura
+            comprovante. Volta para marcar horário. Depois procura a conversa de
+            novo.
           </p>
           <p className="mt-4 max-w-2xl text-lg font-medium">
-            Seu cliente disse “vou fechar”? Tire o resto da conversa do
-            WhatsApp.
+            O FechaZap transforma tudo isso em um único fluxo.
           </p>
         </div>
       </section>
@@ -196,7 +212,7 @@ export default function HomePage() {
 
       <section className="border-t">
         <div className={cn(appFrame, "py-16")}>
-          <h2 className="text-2xl font-semibold">Tudo no mesmo fechamento</h2>
+          <h2 className="text-2xl font-semibold">Um link. Todo o fechamento.</h2>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Sem planilha, sem PDF solto, sem “me manda o PIX de novo”.
           </p>
@@ -239,6 +255,20 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-t bg-muted/30">
+        <div className={cn(appFrame, "py-16")}>
+          <h2 className="max-w-2xl text-3xl font-semibold">
+            WhatsApp é ótimo para conversar.
+            <br />
+            Não para organizar seu negócio.
+          </h2>
+          <p className="mt-4 max-w-2xl text-muted-foreground">
+            Continue falando com seus clientes onde eles já estão. O FechaZap
+            cuida do que vem depois.
+          </p>
         </div>
       </section>
 

@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/#como-funciona", label: "Como funciona" },
   { href: "/preview", label: "Preview" },
   { href: "/precos", label: "Preços" },
+  { href: "/ajuda", label: "Ajuda" },
 ];
 
 export function SiteHeader({ className }: { className?: string }) {
@@ -44,7 +45,7 @@ export function SiteHeader({ className }: { className?: string }) {
             <Link href="/entrar">Entrar</Link>
           </Button>
           <Button asChild variant="accent">
-            <Link href="/criar-conta">Criar conta</Link>
+            <Link href="/criar-conta">Criar fechamento</Link>
           </Button>
         </div>
         <div className="flex items-center gap-1 md:hidden">
@@ -75,7 +76,7 @@ export function SiteHeader({ className }: { className?: string }) {
                   <Link href="/entrar">Entrar</Link>
                 </Button>
                 <Button asChild variant="accent">
-                  <Link href="/criar-conta">Criar conta</Link>
+                  <Link href="/criar-conta">Criar fechamento</Link>
                 </Button>
               </div>
             </SheetContent>

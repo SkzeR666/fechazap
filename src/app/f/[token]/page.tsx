@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { Field } from "@/components/field";
 import { Carimbo } from "@/components/carimbo";
 import { Money, formatDateTime } from "@/components/money";
 import { STATUS_LABEL, isStamped, stampLabel } from "@/lib/status";
+import { daysUntil } from "@/lib/relative-time";
 import type { QuoteStatus } from "@/src/domain/quote-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NarrowPage } from "@/components/narrow-page";
@@ -41,8 +42,9 @@ export default function PublicClosingPage() {
         : false,
   });
 
-  const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: ["public-quote", token] });
+  const refresh = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["public-quote", token] });
+  }, [queryClient, token]);
 
   useEffect(() => {
     const status = quoteQuery.data?.status;
@@ -73,10 +75,19 @@ export default function PublicClosingPage() {
   const quote = quoteQuery.data;
   const animate = stampKey > 0;
   const closed = isClosedStatus(quote.status);
+  const expired =
+    quote.status === "expired" ||
+    (Boolean(quote.expiresAt) &&
+      new Date(quote.expiresAt!).getTime() < Date.now() &&
+      (quote.status === "sent" || quote.status === "viewed"));
 
   return (
     <NarrowPage>
-      {quote.status === "sent" || quote.status === "viewed" ? (
+      {expired ? (
+        <ExpiredPanel quote={quote} />
+      ) : null}
+
+      {!expired && (quote.status === "sent" || quote.status === "viewed") ? (
         confirming ? (
           <ConfirmForm quote={quote} token={token} onDone={refresh} />
         ) : (
@@ -111,7 +122,7 @@ export default function PublicClosingPage() {
         <DonePanel quote={quote} />
       ) : null}
 
-      {closed ? (
+      {closed && quote.status !== "expired" ? (
         <div className="text-center">
           <h1 className="text-2xl font-semibold">
             {STATUS_LABEL[quote.status]}
@@ -123,7 +134,16 @@ export default function PublicClosingPage() {
         </div>
       ) : null}
 
-      {isStamped(quote.status) && !closed ? (
+      {quote.status === "requested" || quote.status === "draft" ? (
+        <div>
+          <h1 className="text-2xl font-semibold">Proposta em preparação</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            O prestador ainda está organizando os detalhes.
+          </p>
+        </div>
+      ) : null}
+
+      {isStamped(quote.status) && !closed && quote.status !== "accepted" ? (
         <div className="mt-8 flex justify-center" key={stampKey}>
           <Carimbo
             size="md"
@@ -173,6 +193,12 @@ function ProposalPanel({
       <p className="mt-2 text-sm text-muted-foreground">
         {quote.customer.name}, preparei tudo para você por aqui.
       </p>
+      {quote.expiresAt ? (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Esta condição fica disponível por mais {Math.max(daysUntil(quote.expiresAt), 0)}{" "}
+          {daysUntil(quote.expiresAt) === 1 ? "dia" : "dias"}.
+        </p>
+      ) : null}
       <QuoteItems quote={quote} />
       <Button
         variant="accent"
@@ -230,12 +256,12 @@ function AcceptedPending({
   token: string;
   onDone: () => void;
 }) {
-  const attempted = useRef(false);
   const [retrying, setRetrying] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  async function confirmContract() {
+  const confirmContract = useCallback(async () => {
     setRetrying(true);
+    setFailed(false);
     try {
       await api.public.acceptContract(token);
       onDone();
@@ -245,13 +271,24 @@ function AcceptedPending({
     } finally {
       setRetrying(false);
     }
-  }
+  }, [onDone, token]);
 
   useEffect(() => {
-    if (attempted.current) return;
-    attempted.current = true;
-    void confirmContract();
-  }, [token]);
+    let cancelled = false;
+    void api.public
+      .acceptContract(token)
+      .then(() => {
+        if (!cancelled) onDone();
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setFailed(true);
+        toast.error("Não foi possível confirmar o serviço.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [onDone, token]);
 
   return (
     <div className="grid gap-3">
@@ -327,6 +364,9 @@ function ConfirmForm({
           defaultValue={quote.customer.name}
         />
       </Field>
+      {quote.customer.phone ? (
+        <p className="text-sm text-muted-foreground">{quote.customer.phone}</p>
+      ) : null}
       <Field label="CPF" htmlFor="cpf">
         <Input
           id="cpf"
@@ -347,6 +387,11 @@ function ConfirmForm({
         />
         <span>Li e concordo com as condições do serviço.</span>
       </label>
+      {quote.provider.cancellationPolicy ? (
+        <p className="text-sm text-muted-foreground">
+          {quote.provider.cancellationPolicy}
+        </p>
+      ) : null}
       <Button
         type="submit"
         variant="accent"
@@ -521,6 +566,10 @@ function DonePanel({ quote }: { quote: PublicQuote }) {
     quote,
     "Oi! Sobre o atendimento confirmado.",
   );
+  const rescheduleHref = providerWhatsApp(
+    quote,
+    "Oi! Preciso mudar o horário do atendimento.",
+  );
   return (
     <div className="text-center">
       <h1 className="text-2xl font-semibold">Fechado. Até lá. ✓</h1>
@@ -535,6 +584,27 @@ function DonePanel({ quote }: { quote: PublicQuote }) {
         <Button asChild variant="accent" className="mt-6 h-11 w-full">
           <a href={chatHref} target="_blank" rel="noreferrer">
             Falar pelo WhatsApp
+          </a>
+        </Button>
+      ) : null}
+      {slot ? (
+        <Button asChild variant="outline" className="mt-2 h-11 w-full">
+          <a
+            href={googleCalendarUrl(
+              `${serviceName(quote) ?? "Atendimento"} · ${quote.provider.businessName}`,
+              slot,
+            )}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Adicionar ao calendário
+          </a>
+        </Button>
+      ) : null}
+      {rescheduleHref ? (
+        <Button asChild variant="ghost" className="mt-2 h-11 w-full">
+          <a href={rescheduleHref} target="_blank" rel="noreferrer">
+            Precisa mudar o horário? Solicitar reagendamento
           </a>
         </Button>
       ) : null}
@@ -597,6 +667,44 @@ function isClosedStatus(status: QuoteStatus) {
     status === "declined" ||
     status === "refunded"
   );
+}
+
+function ExpiredPanel({ quote }: { quote: PublicQuote }) {
+  const chatHref = providerWhatsApp(
+    quote,
+    "Oi! A proposta expirou. Pode enviar uma nova condição?",
+  );
+  return (
+    <div className="text-center">
+      <h1 className="text-2xl font-semibold">Esta proposta expirou</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Entre em contato com o profissional para solicitar uma nova condição.
+      </p>
+      {chatHref ? (
+        <Button asChild variant="accent" className="mt-6 h-11 w-full">
+          <a href={chatHref} target="_blank" rel="noreferrer">
+            Falar pelo WhatsApp
+          </a>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function googleCalendarUrl(title: string, startIso: string) {
+  const start = new Date(startIso);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const stamp = (value: Date) =>
+    value
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}Z$/, "Z");
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${stamp(start)}/${stamp(end)}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 function maskCpf(value: string) {

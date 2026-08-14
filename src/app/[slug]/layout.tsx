@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "Página não encontrada", robots: { index: false, follow: false } };
   const description =
     data.bio ||
-    `Conheça os serviços de ${data.businessName} e peça um orçamento online.`;
+    `Conheça os serviços de ${data.businessName} e solicite atendimento online.`;
   return {
     title: data.businessName,
     description,

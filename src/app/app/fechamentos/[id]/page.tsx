@@ -24,6 +24,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { QuoteStatus } from "@/src/domain/quote-state";
 import { whatsappUrl } from "@/src/lib/whatsapp";
 import { interpolate, MESSAGE_TEMPLATES } from "@/lib/messages";
+import { LOSS_REASONS } from "@/lib/loss-reasons";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export default function FechamentoDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -109,6 +121,12 @@ export default function FechamentoDetailPage() {
           >
             Copiar link
           </Button>
+          <CancelClosing
+            token={token}
+            quoteId={id}
+            status={quote.status}
+            onDone={refresh}
+          />
         </div>
       </div>
 
@@ -255,7 +273,6 @@ export default function FechamentoDetailPage() {
     </div>
   );
 }
-
 function NextActionButton({
   cta,
   status,
@@ -482,5 +499,82 @@ function OfferSlots({
         Enviar horários
       </Button>
     </Card>
+  );
+}
+
+function CancelClosing({
+  token,
+  quoteId,
+  status,
+  onDone,
+}: {
+  token: string | null;
+  quoteId: string;
+  status: QuoteStatus;
+  onDone: () => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<string>("");
+  const [pending, setPending] = useState(false);
+  const terminal =
+    status === "completed" ||
+    status === "cancelled" ||
+    status === "expired" ||
+    status === "declined" ||
+    status === "refunded";
+  if (terminal) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost">Cancelar</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Por que esse fechamento não aconteceu?</DialogTitle>
+          <DialogDescription>
+            Isso ajuda a entender onde as propostas param.
+          </DialogDescription>
+        </DialogHeader>
+        <RadioGroup value={reason} onValueChange={setReason} className="grid gap-2">
+          {LOSS_REASONS.map((item) => (
+            <label key={item.id} className="flex items-center gap-2 text-sm">
+              <RadioGroupItem value={item.id} />
+              <Label>{item.label}</Label>
+            </label>
+          ))}
+        </RadioGroup>
+        <DialogFooter>
+          <Button
+            variant="accent"
+            disabled={!reason || pending}
+            onClick={async () => {
+              if (!token || !reason) return;
+              setPending(true);
+              try {
+                const label =
+                  LOSS_REASONS.find((item) => item.id === reason)?.label ??
+                  reason;
+                await api.provider.transition(
+                  token,
+                  quoteId,
+                  "cancelled",
+                  label,
+                );
+                toast.success("Fechamento cancelado.");
+                setOpen(false);
+                await onDone();
+              } catch {
+                toast.error("Não foi possível cancelar este fechamento.");
+              } finally {
+                setPending(false);
+              }
+            }}
+          >
+            {pending ? "Cancelando..." : "Confirmar cancelamento"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

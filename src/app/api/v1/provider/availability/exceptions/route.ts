@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiError, authenticatedDb } from "@/src/server/http";
+import { apiError, authenticatedDb, validatedJson } from "@/src/server/http";
 
 const schema = z.object({
   startsAt: z.string().min(1),
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   try {
     const auth = await authenticatedDb(request);
     if (!auth) return Response.json({ error: "unauthorized" }, { status: 401 });
-    const body = schema.parse(await request.json());
+    const body = await validatedJson(request, schema, 4_096);
     const startsAt = new Date(body.startsAt);
     const endsAt = new Date(body.endsAt);
     if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {

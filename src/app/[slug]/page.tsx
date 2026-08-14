@@ -77,7 +77,7 @@ export default function PublicStorefront() {
         )}
       </section>
       <Button asChild variant="accent" size="lg" className="mt-8 h-11 w-full">
-        <Link href={`/${slug}/orcamento`}>Pedir orçamento</Link>
+        <Link href={`/${slug}/orcamento`}>Solicitar atendimento</Link>
       </Button>
       {profile.showBranding ? (
         <p className="mt-8 text-center font-mono text-xs text-muted-foreground">

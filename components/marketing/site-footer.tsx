@@ -8,8 +8,8 @@ export function SiteFooter() {
         <div>
           <p className="font-heading text-lg font-semibold">FechaZap</p>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-            Página de serviços + funil de fechamento. Sem marketplace, sem app
-            pro cliente.
+          Página de serviços + fluxo de fechamento. Sem marketplace, sem app
+          pro cliente.
           </p>
         </div>
         <div className="grid gap-2 text-sm">
@@ -46,6 +46,9 @@ export function SiteFooter() {
           </Link>
           <Link href="/privacidade" className="text-muted-foreground hover:text-foreground">
             Privacidade
+          </Link>
+          <Link href="/ajuda" className="text-muted-foreground hover:text-foreground">
+            Ajuda
           </Link>
         </div>
       </div>

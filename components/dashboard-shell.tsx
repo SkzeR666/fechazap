@@ -4,10 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
-  Bell,
   Calendar,
   LayoutDashboard,
-  Link2,
   Menu,
   Plus,
   Settings,
@@ -16,8 +14,9 @@ import {
   Wrench,
   FileStack,
   ClipboardList,
-  BarChart3,
 } from "lucide-react";
+import { CommandMenu } from "@/components/command-menu";
+import { NotificationsBell } from "@/components/notifications-bell";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -32,7 +31,6 @@ const PRIMARY = [
   { href: "/app/clientes", label: "Clientes", icon: Users },
   { href: "/app/agenda", label: "Agenda", icon: Calendar },
   { href: "/app/financeiro", label: "Financeiro", icon: Wallet },
-  { href: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
 ];
 
 const CATALOG = [
@@ -42,7 +40,6 @@ const CATALOG = [
 
 const SETTINGS = [
   { href: "/app/configuracoes", label: "Configurações", icon: Settings },
-  { href: "/app/links", label: "Links", icon: Link2 },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -130,11 +127,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               {profile.data?.data?.business_name ?? "Seu negócio"}
             </p>
             <div className="ml-auto flex items-center gap-1">
-              <Button variant="ghost" size="icon" asChild aria-label="Notificações">
-                <Link href="/app">
-                  <Bell className="size-4" />
-                </Link>
-              </Button>
+              <CommandMenu />
+              <NotificationsBell />
               <ThemeToggle />
               <Sheet>
                 <SheetTrigger asChild>

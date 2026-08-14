@@ -16,9 +16,11 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
 
 export function MarketingCta({
   title,
+  description = "Crie sua proposta, envie o link e acompanhe o cliente até o atendimento.",
   href = "/criar-conta",
 }: {
   title: string;
+  description?: string;
   href?: string;
 }) {
   return (
@@ -29,7 +31,10 @@ export function MarketingCta({
           "flex flex-col items-start gap-4 py-12 md:flex-row md:items-center md:justify-between",
         )}
       >
-        <h2 className="max-w-md text-2xl font-semibold">{title}</h2>
+        <div className="max-w-xl">
+          <h2 className="text-2xl font-semibold">{title}</h2>
+          <p className="mt-2 text-muted-foreground">{description}</p>
+        </div>
         <Button asChild variant="accent" size="lg" className="h-11">
           <Link href={href}>Começar grátis</Link>
         </Button>

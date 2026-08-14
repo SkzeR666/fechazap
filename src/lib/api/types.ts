@@ -63,8 +63,9 @@ export type PublicQuote = {
     brandColor: string | null;
     pixKey: string | null;
     whatsapp: string | null;
+    cancellationPolicy?: string | null;
   };
-  customer: { name: string };
+  customer: { name: string; phone?: string | null };
   items: PublicQuoteItem[];
   acceptance: { acceptedAt: string; accepterName: string } | null;
   appointments: Array<{
@@ -85,6 +86,12 @@ export type ProfileRow = {
   user_id: string;
   slug: string;
   business_name: string;
+  display_name?: string | null;
+  instagram?: string | null;
+  document?: string | null;
+  address?: string | null;
+  service_modes?: string[] | null;
+  cancellation_policy?: string | null;
   bio: string | null;
   logo_url: string | null;
   brand_color: string | null;
@@ -98,6 +105,12 @@ export type ProfileRow = {
 export type ProfileInput = {
   slug: string;
   businessName: string;
+  displayName?: string;
+  instagram?: string;
+  document?: string;
+  address?: string;
+  serviceModes?: string[];
+  cancellationPolicy?: string;
   bio?: string;
   logoUrl?: string;
   brandColor?: string;

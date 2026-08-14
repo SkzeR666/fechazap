@@ -17,7 +17,13 @@ import { Money, Timestamp, formatBRL } from "@/components/money";
 import { whatsappUrl } from "@/src/lib/whatsapp";
 import { interpolate, MESSAGE_TEMPLATES } from "@/lib/messages";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { QuoteListRow } from "@/src/lib/api/types";
 import type { QuoteStatus } from "@/src/domain/quote-state";
@@ -206,11 +212,13 @@ export default function HomePage() {
       </Card>
 
       <Card className="gap-0 p-0">
-        <CardHeader className="flex flex-row items-center justify-between border-b py-4">
+        <CardHeader className="border-b py-4">
           <CardTitle>Próximos serviços</CardTitle>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/app/agenda">Ver agenda</Link>
-          </Button>
+          <CardAction>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/app/agenda">Ver agenda</Link>
+            </Button>
+          </CardAction>
         </CardHeader>
         {upcoming.length === 0 ? (
           <p className="px-4 py-6 text-sm text-muted-foreground">
